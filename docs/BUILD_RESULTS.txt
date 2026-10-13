@@ -1,0 +1,9 @@
+Compiling 124 files with Solc 0.8.26
+Solc 0.8.26 finished in 30.86s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+   --> src/UnlkHook.sol:189:5:
+    |
+189 |     function afterInitialize(address, PoolKey calldata key, uint160, int24)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+

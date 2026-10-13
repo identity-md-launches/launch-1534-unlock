@@ -1,0 +1,35 @@
+{
+  "kind": "univ4_hook",
+  "hook": {
+    "contract": "UnlkHook",
+    "constructorArgs": [
+      "$poolManager",
+      "$token",
+      "$factory",
+      "$owner"
+    ],
+    "permissions": [
+      "beforeInitialize",
+      "afterInitialize",
+      "beforeAddLiquidity",
+      "afterAddLiquidity",
+      "beforeRemoveLiquidity",
+      "afterRemoveLiquidity",
+      "beforeSwap",
+      "afterSwap"
+    ]
+  },
+  "token": {
+    "contract": "UnlkToken",
+    "name": "UNLOCK",
+    "symbol": "UNLK",
+    "decimals": 18
+  },
+  "pool": {
+    "pairedCurrency": "0x0000000000000000000000000000000000000000",
+    "fee": 12500,
+    "tickSpacing": 60,
+    "initialPrice": "79228162514264337593543950336"
+  },
+  "notes": "SOURCE PACKAGE; NO PUBLIC BROADCAST. New Sepolia launch only, chainId 11155111, ETH pair, poolBps 8700. Stage 1 must remain unbroadcast until an executable owner-wallet stage-2 route and independent release review are secured. Restored 429 files from SHA256-verified implementation bundle 0dcbb533b92aca62ac0ac07e8dd827a7fdb68988b0fa974bbd6394383de697ee at 8bc47cb68deda948f5c2fb1e9a5182bb187d6759, overlaying only this manifest from b89b110f9d9d6236d2570c90bf61be79d183e8827ffa15b7500438e6721176c1 at 7a5e1dc79d05ba7fbeb9166be036cb25b302079e. Constructor stays [$poolManager,$token,$factory,$owner]. Current Sepolia hook factory authenticated: 0x315752fee5cbcaa00333e0d4d91e0cd69429e908; inherited 0x84cf candidate was a ProjectFactory. Owner resolves to the new paid job, verified as 0x48e4e74fe1d0c14404ceb57b9fec5b21329c6ec9; no legacy payer or launch-number constants. Stage 1 factory creates token/hook/distributor, binds this hook in the official pool at initialization and seeds locked principal. UNCONFIGURED rejects swaps/credits/milestones; transfers and eligible native claims work. Stage 2 owner calls hook.deployCompanions(number,feed,routerCreationCode,evidenceCreationCode,oracleCreationCode): exact reviewed creation hashes, authenticated constructor args, one CREATE2 bundle, no replacement. Complete unique-recipient round-0 tree must be certified (max 1024 leaves). Owner calls configureAndActivate once; registry/pool/token creation provenance, initial-allocation receipts, companion code/settings and reciprocal bindings are validated atomically. No upgrade/pause/reset/exemption/withdrawal power. 1B UNLK, 18 decimals, 10/87/3 distribution; tax-free ordinary transfers. Pool fee 12500, factory 80/20 split, zero hook fee. Q=max(0,floor(E*p/10000)-S) from executed official buys, proven original allocation and actual deduplicated native claims. p starts2500, sequential USD FDV tiers100K/250K/500K/1M/2.5M =>3500/4500/5500/7000/8500; 5M permanently bypasses quotas including transfer-only holders, keeping authentication/fees. Oracle: 2h explicit v4 TWAP, 90min Chainlink freshness, 5min read freshness, 17ETH locked-seed opening-value capacity (not a cash-reserve floor), 4min minimum/10min maximum confirmation cadence, 6h per first five tiers then24h final. Invalid observations cannot advance or revoke earned rights. Funded sustained manipulation remains possible: documented real-swap model at $2000/ETH reaches full unlock in56h with181.21ETH gross and2.47ETH net exit loss, or0.65ETH after payer native-fee recovery; all initial13% counter-selling raises modeled gross404.49ETH/net264.82ETH. Not proof of economic safety. Real Sepolia services successfully rehearsed at block11904506 without broadcast. Actual new launch ID/number/addresses/transactions/PoolId and publication commit are still outputs, not supplied or invented. See RELEASE_STATUS.json, README.md, docs/DEPLOYMENT.md, docs/SECURITY_REVIEW.md, docs/VALIDATION.md and current ABIs. Public service does not expose the required post-launch owner-signature operation; source/package fallback applies. The listed initialPrice is the required manifest value; actual opening price derives from the 20ETH policy cap."
+}

@@ -1,0 +1,84 @@
+[
+  {
+    "type": "function",
+    "name": "initCode",
+    "inputs": [
+      {
+        "name": "config",
+        "type": "tuple",
+        "internalType": "struct HookDeployer.Config",
+        "components": [
+          {
+            "name": "manager",
+            "type": "address",
+            "internalType": "contract IPoolManager"
+          },
+          {
+            "name": "token",
+            "type": "address",
+            "internalType": "contract UnlkToken"
+          },
+          {
+            "name": "launchFactory",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "setupAuthority",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "initCodeHash",
+    "inputs": [
+      {
+        "name": "config",
+        "type": "tuple",
+        "internalType": "struct HookDeployer.Config",
+        "components": [
+          {
+            "name": "manager",
+            "type": "address",
+            "internalType": "contract IPoolManager"
+          },
+          {
+            "name": "token",
+            "type": "address",
+            "internalType": "contract UnlkToken"
+          },
+          {
+            "name": "launchFactory",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "setupAuthority",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "pure"
+  }
+]

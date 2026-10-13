@@ -1,0 +1,24 @@
+Compiling 103 files with Solc 0.8.26
+Solc 0.8.26 finished in 4.89s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+   --> src/UnlkHook.sol:189:5:
+    |
+189 |     function afterInitialize(address, PoolKey calldata key, uint160, int24)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 1 test for rehearsal/Sepolia.t.sol:SepoliaRehearsal
+[PASS] testRecordedForkBothStagesTradingClaimsAndFees() (gas: 7014905)
+Logs:
+  FORK ONLY token: 0x369612240808e0a224B3B2e4C75Ec4A4087b8d55
+  FORK ONLY hook: 0x0359634CDfEbbcd1dcf66e55d3202D9CeF54BFC0
+  FORK ONLY distributor: 0x707D04fe9bB224a4293794CCE1ed08F317A04029
+  FORK ONLY router: 0xb11EB1d4ea9Fd0a79Db6Fa0Ca6fAcA6e7c3F01DF
+  FORK ONLY evidence: 0x8BA569F5400E8522580a207B328b4119c1b0D57D
+  FORK ONLY oracle: 0x75febDc0524aeb5F1624b5a9B2dB0C4A631f1f51
+  FORK ONLY poolId: 0xff03323cb70d6ec7c79012d8f0b5290ef8d5935b8246fcad22181e35112cacbf
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.75s (2.07s CPU time)
+
+Ran 1 test suite in 8.99s (8.75s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

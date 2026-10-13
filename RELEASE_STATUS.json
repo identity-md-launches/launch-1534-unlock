@@ -1,0 +1,29 @@
+{
+  "chainId": 11155111,
+  "status": "source_package_fork_rehearsed_not_broadcast",
+  "tradingActiveOnSepolia": false,
+  "stage1BroadcastAllowed": false,
+  "reason": "No supported live operation or owner-wallet signature route for stage-2 deployment and activation was established. Independent review of this revision and acceptance or further mitigation of the measured sustained-manipulation risk remain outstanding.",
+  "jobId": "672489ef-8304-403f-855c-b9dce583bc31",
+  "ownerVerifiedFromNewJob": "0x48e4e74fe1d0c14404ceb57b9fec5b21329c6ec9",
+  "launchId": null,
+  "launchNumber": null,
+  "publicDeploymentAddresses": null,
+  "publicDeploymentTransactions": [],
+  "publicPoolKey": null,
+  "publicPoolId": null,
+  "publicationCommit": null,
+  "rehearsal": {
+    "blockNumber": 11904506,
+    "path": "rehearsal/Sepolia.t.sol",
+    "broadcast": false,
+    "evidence": "docs/FORK_RESULTS.txt"
+  },
+  "requiredOperations": [
+    "IMD authenticates and signs the new factory launch only after stage-2 execution is secured.",
+    "Setup authority signs hook.deployCompanions with exact reviewed creation code.",
+    "Any wallet certifies the actual complete unique-recipient round-0 Merkle tree.",
+    "Setup authority signs hook.configureAndActivate with the recorded companion addresses.",
+    "Publisher records this revision's source repository/commit; operator verifies public receipts and explorer source."
+  ]
+}
