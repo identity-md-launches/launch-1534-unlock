@@ -94,6 +94,7 @@ abstract contract SystemFixture is Test {
         deployer = new HookDeployer();
         // Stage 1: only supported launch inputs. No companion address exists or is needed yet.
         hookInitCode = deployer.initCode(
+            type(UnlkHook).creationCode,
             HookDeployer.Config(manager, UnlkToken(predictedToken), address(factory), owner)
         );
         _mineHookSalt();

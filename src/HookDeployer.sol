@@ -2,7 +2,6 @@
 pragma solidity 0.8.26;
 
 import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
-import {UnlkHook} from "./UnlkHook.sol";
 import {UnlkToken} from "./UnlkToken.sol";
 
 /// @notice Off-chain/test helper that encodes the stage-1 hook init code exactly as IMD's manifest does.
@@ -16,14 +15,23 @@ contract HookDeployer {
         address setupAuthority;
     }
 
-    function initCode(Config calldata config) public pure returns (bytes memory) {
+    /// @dev The caller supplies the reviewed hook creation body; this helper only encodes, never deploys.
+    function initCode(bytes memory hookCreationCode, Config calldata config)
+        public
+        pure
+        returns (bytes memory)
+    {
         return bytes.concat(
-            type(UnlkHook).creationCode,
+            hookCreationCode,
             abi.encode(config.manager, config.token, config.launchFactory, config.setupAuthority)
         );
     }
 
-    function initCodeHash(Config calldata config) external pure returns (bytes32) {
-        return keccak256(initCode(config));
+    function initCodeHash(bytes memory hookCreationCode, Config calldata config)
+        external
+        pure
+        returns (bytes32)
+    {
+        return keccak256(initCode(hookCreationCode, config));
     }
 }

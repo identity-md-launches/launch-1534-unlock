@@ -407,6 +407,7 @@ contract ActivationFailurePathsTest is SystemFixture {
     function _secondLaunch(uint64 number) internal returns (UnlkHook h2, UnlkToken t2, MerkleDistributor d2) {
         address predictedToken2 = factory.predictToken(number, type(UnlkToken).creationCode);
         bytes memory init2 = deployer.initCode(
+            type(UnlkHook).creationCode,
             HookDeployer.Config(manager, UnlkToken(predictedToken2), address(factory), owner)
         );
         bytes32 codeHash = keccak256(init2);

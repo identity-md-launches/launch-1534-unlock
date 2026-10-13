@@ -15,6 +15,7 @@ optimizer 200, metadata hash none, FFI disabled, no filesystem cheatcode permiss
 forge build
 python3 scripts/generate_code_checks.py --check
 forge test
+python3 -B -m unittest discover -s test -p 'test_release_artifacts.py' -v
 forge fmt --check
 forge lint src --severity high med
 python3 scripts/verify_network.py
@@ -23,7 +24,7 @@ python3 scripts/release_artifacts.py
 sha256sum -c docs/SOURCE_SHA256SUMS
 ```
 
-`scripts/check.sh` performs build, creation-hash checks, tests, formatting, source lint and saved-network checks.
+`scripts/check.sh` performs build, creation-hash checks, Solidity/Python tests, formatting, source lint, saved-network checks, ABI export and unconditional release size/digest checks.
 The hashes in `ReviewedCode.sol` must match the four reviewed compiler creation bodies. A deliberate companion
 or token source change requires review, rebuilding and regeneration; it cannot silently become an activation
 candidate. There are no unresolved library links. `ARTIFACTS.json` distinguishes compiler runtime templates
@@ -33,27 +34,38 @@ from actual deployed runtime hashes, and records ABI digests and the digest of `
 
 | Check | Result | Raw evidence |
 |---|---|---|
-| `forge build --force` | PASS; all 124 compilation units rebuilt with pinned compiler | `BUILD_RESULTS.txt` |
-| `forge test` | **142 passed, 0 failed, 0 skipped**, 28 suites | `TEST_RESULTS.txt` |
-| Alternate seed, four threads, environment containing only PATH | **142 passed, 0 failed, 0 skipped** | `MINIMAL_ENV_TEST_RESULTS.txt` |
+| `forge build` | PASS; pinned Solc 0.8.26 | `BUILD_RESULTS.txt` |
+| `forge test` | **175 passed, 0 failed, 0 skipped**, 38 suites | `TEST_RESULTS.txt` |
+| Alternate seed, four threads, minimal environment | **175 passed, 0 failed, 0 skipped** with PATH + existing HOME; PATH alone crashes in Foundry before tests | `MINIMAL_ENV_TEST_RESULTS.txt` |
+| Python release size regression tests | **5 passed**; all six artifacts covered | `RELEASE_ARTIFACT_TEST_RESULTS.txt` |
 | `forge fmt --check` | PASS, exit 0, no output | `FMT_RESULTS.txt` |
-| Supplied unmodified protected tests | **11 passed, 0 failed, 0 skipped** | `PROTECTED_TEST_RESULTS.txt` |
-| Recorded Sepolia fork, both stages and trading | **1 passed, 0 failed, 0 skipped** | `FORK_RESULTS.txt` |
-| Sustained manipulation and maximum tree gas | **4 passed**; actual economic measurements recorded | `ECONOMICS_RESULTS.txt` |
-| Saved platform bytecode/source comparisons | PASS | `NETWORK_VERIFICATION_RESULTS.txt` |
+| `imd launch check .` | PASS locally; not service re-admission; Slither only on verifier | `IMD_LAUNCH_CHECK_RESULTS.txt` |
+| Production bytecode comparison to published f77cf377 | Five production creation/runtime bodies identical; published hashes match | `BYTECODE_COMPARISON_RESULTS.txt` |
+| Saved platform bytecode/source comparisons | PASS offline | `NETWORK_VERIFICATION_RESULTS.txt` |
 | `forge lint src --severity high med` | Completed, warnings triaged below | `LINT_RESULTS.txt` |
+| Historical supplied protected tests | Prior **11 passed**; input files not supplied this turn, not rerun | `PROTECTED_TEST_RESULTS.txt` |
+| Historical Sepolia fork, both stages and trading | Prior **1 passed**; not rerun this turn | `FORK_RESULTS.txt` |
+| Sustained manipulation and maximum tree gas | Included in the full suite; earlier detailed measurements retained | `ECONOMICS_RESULTS.txt` |
 
-The economic tests are part of the 142, not four additional tests. The protected suite is separate and its copies
-are removed from `test/scratch` after execution. The default test suite never forks or reads environment variables.
-The minimal-environment run used `forge test --threads 4 --fuzz-seed 0x20261013` from a child process whose environment
-contained only PATH. Default fuzz runs are 256; individual properties declare 160 or 512 where noted. Stateful
-invariants use 128 runs and depth 40, with handler reachability tests preventing a vacuous all-reverting campaign.
+The 175 tests comprise all 170 existing tests plus five new encoder regressions. The protected suite is separate;
+its historical copies were removed from `test/scratch`. None of its checks were weakened. The default test suite
+never forks or reads environment variables. The alternate run used `forge test --threads 4 --fuzz-seed 0x20261013`
+with only PATH and the existing HOME in a child process. A first PATH-only attempt panicked in the installed
+Foundry/SVM (`could not detect user home directory`) before any test executed; both attempts are recorded.
+Default fuzz runs are 256; individual tests/invariants retain their existing run/depth overrides.
 
-There is one compiler advisory: `afterInitialize` could have `view` mutability. It returns the expected selector
-after authentication and does not write state. Lint reports 31 warnings: 23 checked/range-bounded casts, three
-default-zero locals, two deliberate settlement-balance equalities, two generic reentrancy notices and one signed
-floor-division precision notice. The reasoning and actual guarded external-call paths are in `SECURITY_REVIEW.md`.
-No Slither, Mythril, formal verification or independent contributor review was performed on this revision.
+Build warnings concern `afterInitialize`'s possible view mutability and deliberate forced-ETH `selfdestruct` test
+fixtures. Source lint reports 30 warnings: 22 checked/range-bounded casts, three default-zero locals, two
+deliberate settlement-balance equalities, two generic reentrancy notices and one signed floor-division precision
+notice. The reasoning and guarded external-call paths are in `SECURITY_REVIEW.md`. No Slither, Mythril, formal
+verification or independent contributor review was performed on this fix. The old launch record's passed review
+applies to the published base, not this new submission.
+
+`test/HookDeployer.t.sol` deploys the helper, checks its actual runtime against 24576, pins the reviewed hook
+creation hash, compares the encoded four addresses and hash, and detects changed setup authority/creation code.
+`test/test_release_artifacts.py` runs the release script against isolated artifact copies, rejects oversized
+runtime and initcode for every release artifact (including the helper), counts constructor arguments, and covers
+exact size boundaries. The full production bytecode and ABI comparison is reproducible in `SIZE_FIX.md`.
 
 ## Coverage that matters
 
@@ -81,20 +93,21 @@ not be broadcast with it.
 
 ## Deployment sizes
 
-| Contract | Creation body bytes | Runtime template bytes |
-|---|---:|---:|
-| UnlkToken | 3444 | 2320 |
-| UnlkHook | 25702 | 24328 |
-| UnlkSwapRouter | 8102 | 7761 |
-| MerkleClaimEvidence | 5943 | 5675 |
-| UnlkOracle | 7857 | 7517 |
-| HookDeployer | 26292 | 26264 |
+| Contract | Creation body bytes | Constructor bytes | Full initcode bytes | Runtime template bytes |
+|---|---:|---:|---:|---:|
+| UnlkToken | 3444 | 0 | 3444 | 2320 |
+| UnlkHook | 25702 | 128 | 25830 | 24328 |
+| UnlkSwapRouter | 8102 | 64 | 8166 | 7761 |
+| MerkleClaimEvidence | 5943 | 64 | 6007 | 5675 |
+| UnlkOracle | 7857 | 96 | 7953 | 7517 |
+| HookDeployer | 756 | 0 | 756 | 728 |
 
-Every deployable runtime is below 24,576 bytes (`UnlkHook` with 248 bytes of margin after this revision's seed
-and allocation checks). Creation bodies plus their fixed constructor arguments are below 49,152 bytes.
-`HookDeployer` is an off-chain helper for prediction/mining whose runtime embeds the hook's init code and now
-exceeds EIP-170; it is called in the VM by tests and scripts, never deployed, and is not a replacement for the
-authenticated platform factory. Twenty ABIs are exported, including the verified platform factory, registry, fees and distributor.
+Every release runtime, including `HookDeployer`, is below 24,576 bytes (`UnlkHook` retains 248 bytes of margin).
+Full initcode includes each artifact's constructor arguments and fits 49,152 bytes. The old helper's 26292/26264
+sizes caused real service rejection; its former exemption was incorrect and has been removed. The helper now
+accepts the reviewed creation code from its caller and remains a pure encoder, never a production factory.
+No oversized artifact is excluded or hidden. All five production bytecodes and ABIs are unchanged from f77cf377.
+Twenty ABIs are exported, including the verified platform factory, registry, fees and distributor.
 
 ## Repeating checks that use external inputs
 
@@ -111,5 +124,8 @@ The fork is pinned to block **11904506**, hash
 `0xf3867dcdde6c437c3297aa05a7e56c1e5c6c63490989ee69d9f69e21e941d87c`. It uses actual factory/registry/fees/manager/feed
 code and the actual authorized signer identities, impersonated only inside Foundry. Synthetic launch number and
 reward leaf are clearly labelled rehearsal inputs. Simulated output addresses are printed only as **FORK ONLY**.
-No real UNLK address, transaction hash, PoolId, source-verification receipt or new GitHub publication commit exists
-yet. Those remain outputs of the authorized live deployment/publication sequence, not requester prerequisites.
+A fresh read-only call to the public RPC endpoint in this continuation returned HTTP 403 Forbidden. The saved
+fork evidence above is historical, not a new run. No real UNLK address, transaction hash, PoolId or source-verification
+receipt exists. The base is published as f77cf377; the fixed commit is still a publisher output after acceptance.
+The supported local `imd launch check .` passed, but the parked launch's service admission was not rerun.
+See `SIZE_FIX.md` for the observed public API limitations and remaining release operations.

@@ -1,15 +1,18 @@
 # UNLOCK / UNLK — Sepolia two-stage release package
 
-**Source and tests are delivered; public trading has not been activated.** Both stages have been rehearsed on the
-real Sepolia factory at recorded block **11,904,506**. No transaction was broadcast. The current contributor job
-has no assigned launch ID/number or deployment record yet. The public IMD interface does not expose the required
-owner-signed post-launch operations. Stage 1 must remain unbroadcast until that execution path is secured.
+**This continuation fixes the source of launch 1534's admission failure; public trading remains inactive.**
+Launch `55d5370e-7256-465c-808f-09ba4cc8ccee` is parked because the old `HookDeployer` runtime was 26,264 bytes.
+The helper now accepts the reviewed hook creation code as input and has a **728-byte runtime**. All five production
+contracts have identical creation/runtime bytecode. The full 175-test suite and `imd launch check .` pass locally;
+service re-admission of the parked launch remains a separate operation. No transaction was broadcast.
+Both stages were previously rehearsed on the real Sepolia factory at recorded block **11,904,506**.
+Stage 1 must remain unbroadcast until the owner's stage-2 execution path and the outstanding release decisions are secured.
 See [deployment and required signatures](docs/DEPLOYMENT.md), [release status](RELEASE_STATUS.json), and
 [review and measured manipulation risk](docs/SECURITY_REVIEW.md). Fork addresses are simulations, not deployments.
 
-Recovered from the two requested, SHA-256-verified bundles, preserving all 429 starting files. This revision is
-based on implementation `8bc47cb68deda948f5c2fb1e9a5182bb187d6759` plus only `launch.json` from
-`7a5e1dc79d05ba7fbeb9166be036cb25b302079e`; it was not restarted from launch-1309. [Recovery record](docs/RECOVERY.md).
+Continues the published source at `f77cf377f6eb58f05ef9b9c61f36407933d5053a`, including its accepted work.
+GitHub main and the project's published head still matched that commit when checked. No earlier bundle was
+recovered again. [Size-fix handoff and publication status](docs/SIZE_FIX.md); [historical recovery record](docs/RECOVERY.md).
 
 ## Build and check
 
@@ -17,8 +20,12 @@ based on implementation `8bc47cb68deda948f5c2fb1e9a5182bb187d6759` plus only `la
 forge build
 python3 scripts/generate_code_checks.py --check
 forge test
+python3 -B -m unittest discover -s test -p 'test_release_artifacts.py' -v
 forge fmt --check
 python3 scripts/verify_network.py
+python3 scripts/export_abis.py
+python3 scripts/release_artifacts.py
+imd launch check .
 ```
 
 Solidity **0.8.26**, Cancun, optimizer 200, `bytecode_hash = "none"`. All Solidity dependencies are ordinary

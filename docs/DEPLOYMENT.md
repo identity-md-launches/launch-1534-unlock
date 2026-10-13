@@ -1,8 +1,10 @@
 # Deployment status and executable handoff
 
-**No public-network transaction has been signed or broadcast. UNLK is not live.** The deliverable is the recovered,
-repaired source/package and a successful rehearsal of both stages on a recorded Sepolia fork. No simulated address
-is presented as a public deployment. `RELEASE_STATUS.json` makes the remaining release gate explicit.
+**No public-network transaction has been signed or broadcast. UNLK is not live.** Launch 1534
+(`55d5370e-7256-465c-808f-09ba4cc8ccee`) is parked on Sepolia. This continuation fixes its helper bytecode size;
+the local checks pass, but publication of the accepted fix and service re-admission remain separate operations.
+The earlier rehearsal of both stages on a recorded Sepolia fork remains historical evidence. No simulated address
+is a public deployment. See [the size-fix handoff](SIZE_FIX.md) and `../RELEASE_STATUS.json`.
 
 ## Verified identities and services
 
@@ -17,14 +19,17 @@ by RPC, compiled bytecode comparison where available, and the fork:
 | PoolManager | [0xE03A1074c86CFeDd5C142C4F04F1a1536e203543](https://sepolia.etherscan.io/address/0xE03A1074c86CFeDd5C142C4F04F1a1536e203543) |
 | ETH/USD proxy | [0x694AA1769357215DE4FAC081bf1f309aDC325306](https://sepolia.etherscan.io/address/0x694AA1769357215DE4FAC081bf1f309aDC325306) |
 | Authorized factory signer | `0xcECc29B037f5064fCdF45a5C318F132ef76aA551` (`factory.deployer()`) |
-| New job's payer / setup authority | `0x48E4E74fE1d0c14404cEB57B9fec5b21329C6ec9` |
+| Launch 1534 requester / intended setup authority | `0x48E4E74fE1d0c14404cEB57B9fec5b21329C6ec9` |
 | Network fee recipient and treasury at snapshot | `0x047F606fD5b2BaA5f5C6c4aB8958E45CB6B054B7` |
 
-The new job's payer was verified through `GET /jobs/672489ef-8304-403f-855c-b9dce583bc31`, which reports a requested
-`univ4_hook` launch on 11155111 and **no assigned launch ID**. The setup authority remains `$owner`, not an address
-hardcoded into contracts. There is no legacy payer or launch-number constant in production code.
+The payer was reconfirmed through `GET /jobs/672489ef-8304-403f-855c-b9dce583bc31` and the parked launch API:
+the launch is assigned number **1534**, kind `univ4_hook`, chain **11155111**, requester as above. The setup
+authority remains `$owner`, not an address hardcoded into contracts. Before broadcast, confirm the intended
+constructor substitution and signing path, and after stage 1 read `hook.setupAuthority()` against that wallet.
+The historical factory signer must be reread on Sepolia before release; this continuation's fresh read-only RPC
+attempt returned HTTP 403 Forbidden. There is no launch-number constant in production code.
 
-The current public [policy](https://api.imd.fun/launch/policies) is version **32**, `univ4_hook`, chain 11155111:
+The parked launch pins [policy](https://api.imd.fun/launch/policies) version **32**, `univ4_hook`, chain 11155111:
 fee tier 12500, 1 billion supply, 10% contributor share, native ETH allowlist, 20 ETH opening FDV, 3600-second
 contributor lock. This request selects poolBps **8700** above the policy's base floor. The default `owners` fields
 in a general policy row do not override the explicit `$owner` constructor substitution for this paid job.
@@ -41,28 +46,33 @@ The feed's executable bytes match the verified proxy (Sourcify reports a metadat
 The manager is Uniswap's [published Sepolia deployment](https://developers.uniswap.org/docs/protocols/v4/deployments),
 pinned by full runtime hash and exercised on the fork; its compiler output was not independently reproduced.
 
-`GET /services` reported verifier `0.1.0+327e1e9f`, deployer `0.1.0+bdb0621d`, publisher `0.1.0+04d3c6da`, all up.
+The earlier `GET /services` snapshot reported verifier `0.1.0+327e1e9f`, deployer `0.1.0+bdb0621d`, publisher `0.1.0+04d3c6da`, all up.
 That establishes service presence, **not authorization to sign as the owner**. The public docs/capabilities provide
 launch admission and publication, but no callable post-launch owner-signature service. No private key is requested.
 
 ## Stage 0 — release gate
 
-The missing operation is an executable, authorized sequence for the owner wallet to deploy the reviewed companions,
+The missing activation operation is an executable, authorized sequence for the owner wallet to deploy the reviewed companions,
 certify the actual frozen tree, and seal activation after IMD's factory transaction. The source contains this exact
 operation and it works on the fork. The live service route/signatures are not available in this assignment.
-Therefore stage 1 remains unbroadcast. This is the brief's authorized **source/package fallback**, not a request
-for future addresses or another paid launch.
+Therefore stage 1 remains unbroadcast. The current continuation publishes code only. The accepted fix must be
+independently reviewed and pinned by IMD's operator when retrying the **same** parked launch; no supported public
+retry endpoint was found. `job.continue` does not redeploy. See `SIZE_FIX.md` for the exact available checks and
+remaining publisher/operator responsibilities.
 
-Before any broadcast, the platform must also record independent review of this revision and address the sustained
-manipulation economics in `SECURITY_REVIEW.md`. Delays cannot certify independent market value. The current artifact
+Before any broadcast, the platform must also record independent review of this revision and explicit resolution of
+the protocol-fee halt, treasury reward-round powers and sustained manipulation economics in `SECURITY_REVIEW.md`.
+This helper size fix does not accept those unresolved risks. Delays cannot certify independent market value. The current artifact
 must not be described as independently audited or manipulation-safe.
 
 ## Stage 1 — IMD signer through the authenticated LaunchFactory
 
-Use the actual **new** assigned launch number, attestation, frozen reward root and policy; never 1309, 1401, the
-fork's synthetic number, or a fabricated allocation tree. Mine the hook salt against the factory and exact
+Use the existing assigned launch number **1534**, its reviewed fixed-commit attestation, frozen reward root and
+policy; never the fork's synthetic number or a fabricated allocation tree. Mine the hook salt against the factory and exact
 creation code with constructor arguments `(manager, predictedToken, factory, owner)`; required flags **0x3fc0**.
-`HookDeployer` provides init-code/mining helpers. The supplied manifest has the four supported placeholders.
+`HookDeployer.initCode(reviewedHookCreationCode, config)` and `initCodeHash(reviewedHookCreationCode, config)`
+only encode/predict. The caller supplies the reviewed `UnlkHook` creation body; the helper neither authenticates
+that input nor deploys anything. The supplied manifest retains the same four supported placeholders.
 
 Factory `launch` creates the token/hook/native distributor, splits the supply, initializes the official native ETH
 pool with this hook, and seeds its token-only position in one transaction. No hook is attached later. Record:
@@ -75,9 +85,10 @@ The manifest's required initialPrice string is `79228162514264337593543950336`; 
 opening price from the 20 ETH policy cap, token ordering and tick spacing. It must not seed at 1:1.
 After this transaction alone: **pool deployed, trading inactive**. Native transfers/eligible claims already work.
 
-## Stage 2 — three owner-wallet transactions
+## Stage 2 — two owner calls and permissionless certification
 
-1. Call `hook.deployCompanions(newNumber, publishedFeed, routerCreationCode, evidenceCreationCode,
+1. The setup-authority wallet `0x48e4e74fe1d0c14404ceb57b9fec5b21329c6ec9` calls
+   `hook.deployCompanions(1534, publishedFeed, routerCreationCode, evidenceCreationCode,
    oracleCreationCode)`. Exact compiled creation bodies (without arguments) are inputs; the hook validates hashes,
    appends authenticated arguments and CREATE2-deploys the bundle atomically. Read `CompanionsDeployed` and
    `stagedRouter/stagedRewards/stagedOracle`. No ordinary external deployment can substitute for this provenance.
@@ -93,11 +104,16 @@ After this transaction alone: **pool deployed, trading inactive**. Native transf
    recipient and root, returning arrays in the exact heap leaf order. A root with two leaves for one recipient can
    never be certified by either path: do not broadcast stage 1 with such a round 0. Native claim eligibility
    itself is never altered by certificate requirements.
-3. The immutable setup authority calls `configureAndActivate(stagedRouter, stagedRewards, stagedOracle, newNumber)`.
+3. The same immutable setup authority calls `configureAndActivate(stagedRouter, stagedRewards, stagedOracle, 1534)`.
    This is the atomic sealing call. A failure changes no activation state; corrected external conditions can be
    retried with the same bundle. A successful call permanently removes all setup powers.
 
-`script/Stage2.s.sol` executes those calls from `hook.setupAuthority()`, with explicit function arguments:
+The current launch API with `claims=1` still returns null claims, root and reward snapshot. Its old economics
+check mentions 457 allocations but does not expose the complete certificate. Obtain the actual frozen tree and
+confirm a certificate submitter before any broadcast; the historic test/fork leaves cannot substitute.
+
+`script/Stage2.s.sol` executes those calls from `hook.setupAuthority()`, with explicit function arguments
+(`UNLK_NUMBER=1534`). This is a future operator command, not an authorization to broadcast this continuation:
 
 ```sh
 # Fill these with actual recorded outputs and certificate arrays; no example stand-in addresses are usable.
@@ -132,8 +148,11 @@ No such real receipt, token address, pool ID or explorer verification exists yet
 
 ## Publication
 
-The requested recovered GitHub repository/commits are recorded in `RECOVERY.md`. The current source resides in this
-submission; its **new publication repository/commit must be returned by IMD's publisher** after acceptance. The
+The published base is `f77cf377f6eb58f05ef9b9c61f36407933d5053a` in
+`https://github.com/identity-md-launches/launch-1534-unlock`. This continuation stays in that project repository.
+The current source resides in this submission; its **actual fixed publication commit must be returned by IMD's publisher** after acceptance. The
 workspace Git metadata is protected by this task, so it was neither rewritten nor used to invent a release commit.
-The ordinary source package, ABI files, evidence and `launch.json` are ready for that publisher. Do not overwrite
-the parent launch's repository or advertise a parent commit as the repaired revision.
+The source package, updated helper ABI/digests/evidence and unchanged `launch.json` are ready for that publisher.
+Do not advertise the base commit as the fix. The publisher's new SHA must be independently reviewed and used by
+the operator for re-admission of launch 1534, not for a replacement token. `SIZE_FIX.md` records the public API
+limitations; a new published SHA and supported parked-launch retry remain unavailable during this implementation step.

@@ -1,6 +1,18 @@
-Compiling 126 files with Solc 0.8.26
-Solc 0.8.26 finished in 48.09s
+Compiling 26 files with Solc 0.8.26
+Solc 0.8.26 finished in 29.92s
 Compiler run successful with warnings:
+Warning (5159): "selfdestruct" has been deprecated. Note that, starting from the Cancun hard fork, the underlying opcode no longer deletes the code and data associated with an account and only transfers its Ether to the beneficiary, unless executed in the same transaction in which the contract was created (see EIP-6780). Any use in newly deployed contracts is strongly discouraged even if the new behavior is taken into account. Future changes to the EVM might further reduce the functionality of the opcode.
+  --> test/BatchSettlementProperties.t.sol:14:9:
+   |
+14 |         selfdestruct(recipient);
+   |         ^^^^^^^^^^^^
+
+Warning (5159): "selfdestruct" has been deprecated. Note that, starting from the Cancun hard fork, the underlying opcode no longer deletes the code and data associated with an account and only transfers its Ether to the beneficiary, unless executed in the same transaction in which the contract was created (see EIP-6780). Any use in newly deployed contracts is strongly discouraged even if the new behavior is taken into account. Future changes to the EVM might further reduce the functionality of the opcode.
+  --> test/NativeCustodyInvariants.t.sol:15:9:
+   |
+15 |         selfdestruct(recipient);
+   |         ^^^^^^^^^^^^
+
 Warning (2018): Function state mutability can be restricted to view
    --> src/UnlkHook.sol:205:5:
     |

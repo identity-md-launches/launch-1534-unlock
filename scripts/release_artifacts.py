@@ -19,12 +19,17 @@ for name in NAMES:
     assert not creation.get("linkReferences") and not runtime.get("linkReferences"), "unlinked library"
     init_bytes = len(bytes.fromhex(creation["object"].removeprefix("0x")))
     runtime_bytes = len(bytes.fromhex(runtime["object"].removeprefix("0x")))
-    # HookDeployer is an off-chain prediction/mining helper whose runtime embeds the hook's init code; it is
-    # never deployed on chain (tests and scripts call it in the VM), so EIP-170 does not apply to it.
-    assert init_bytes < 49152 and (runtime_bytes <= 24576 or name == "HookDeployer"), name + " exceeds EVM code size"
+    # Every release artifact is checked, including helpers. EIP-3860 counts the constructor arguments too.
+    constructor = next((entry for entry in a["abi"] if entry["type"] == "constructor"), {"inputs": []})
+    assert all(arg["type"] == "address" for arg in constructor["inputs"]), name + " needs initcode sizing review"
+    constructor_bytes = 32 * len(constructor["inputs"])
+    assert init_bytes < 49152 and init_bytes + constructor_bytes <= 49152, name + " exceeds EVM initcode size"
+    assert runtime_bytes <= 24576, name + " exceeds EIP-170 runtime size"
     artifacts[name] = {
         "creationBodyBytes": init_bytes,
         "creationBodyKeccak256": keccak(creation["object"]),
+        "constructorArgsBytes": constructor_bytes,
+        "initCodeBytes": init_bytes + constructor_bytes,
         "runtimeTemplateBytes": runtime_bytes,
         "runtimeTemplateKeccak256": keccak(runtime["object"]),
         "abiSha256": hashlib.sha256((ROOT / "docs/abi" / (name + ".json")).read_bytes()).hexdigest(),

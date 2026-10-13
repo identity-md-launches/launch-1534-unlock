@@ -1,0 +1,1 @@
+launch.json passes the launch check against this build. Slither runs only on the verifier.

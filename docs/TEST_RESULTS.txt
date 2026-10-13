@@ -1,5 +1,12 @@
 No files changed, compilation skipped
 
+Ran 4 tests for test/SecurityRegression.t.sol:CodeAuthenticationRegressionTest
+[PASS] testActivationExternalFailureRollsBackEveryBinding() (gas: 913067)
+[PASS] testInconsistentImmutablePatchesAreRejected() (gas: 1782922)
+[PASS] testLaterFactoryDonationsCannotRewriteInitialAllocationReceipts() (gas: 688991)
+[PASS] testRuntimeMutationCannotPassGetterChecks() (gas: 84703)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 88.24ms (49.37ms CPU time)
+
 Ran 6 tests for test/ActivationRobustness.t.sol:ActivationRobustnessTest
 [PASS] testPolicySeedRecordsCapacityAndConfirmsTiers() (gas: 30335357)
 [PASS] testSeedBelowOpeningValueFloorCannotLaunch() (gas: 9047798)
@@ -7,17 +14,18 @@ Ran 6 tests for test/ActivationRobustness.t.sol:ActivationRobustnessTest
 [PASS] testSeedInsideTheOnePercentBandActivates() (gas: 15647267)
 [PASS] testStagingRunsActivationPreconditionsAndCanRepeat() (gas: 21081828)
 [PASS] testSubDustSeedRoundingStillActivates() (gas: 16005370)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 101.55ms (40.97ms CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 103.09ms (67.81ms CPU time)
 
-Ran 3 tests for test/FailurePaths.t.sol:ActivationFailurePathsTest
-[PASS] testCompanionConstructorsRejectMissingInputs() (gas: 6057)
-[PASS] testCrossLaunchSetupIsRefusedInEveryDirection() (gas: 30758204)
-[PASS] testSepoliaRefusesLocallyClonedServicesEvenWithFeedAtPublishedAddress() (gas: 676754)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 110.07ms (47.05ms CPU time)
+Ran 4 tests for test/SecurityRegression.t.sol:EvidenceCertificationRegressionTest
+[PASS] testActualLaterRoundClaimsHaveNoArtificialCumulativeCeiling() (gas: 1510126)
+[PASS] testDuplicateRecipientCannotOvercreditSmallerActualClaim() (gas: 441218)
+[PASS] testIncompleteTreeCannotBeCertified() (gas: 59593)
+[PASS] testOddTreeReconstructionAndPreCertificationNativeClaim() (gas: 580532)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 31.43ms (2.11ms CPU time)
 
 Ran 1 test for test/SecurityRegression.t.sol:LargeTreeCertificationTest
 [PASS] testMaximumSortedTreeFitsTransactionGasLimit() (gas: 15973574)
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 142.65ms (83.13ms CPU time)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 105.98ms (33.41ms CPU time)
 
 Ran 7 tests for test/NativeLaunch.t.sol:NativeLaunchTest
 [PASS] testDeepNativePoolWarmsUpAndCanUnlock() (gas: 136092722)
@@ -27,7 +35,36 @@ Ran 7 tests for test/NativeLaunch.t.sol:NativeLaunchTest
 [PASS] testNativeValueMismatchAndUnsolicitedSendRejected() (gas: 91952)
 [PASS] testOneSidedOpeningLocks87PercentWithoutEthFunding() (gas: 62608)
 [PASS] testThinLaunchCannotUnlockFromInitialSpotOrTinyBuy() (gas: 29938965)
-Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 281.56ms (226.80ms CPU time)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 307.68ms (228.55ms CPU time)
+
+Ran 4 tests for test/ActivationRobustness.t.sol:ChunkedCertificationTest
+[PASS] testChunkBoundsAndSizeAreFixedByTheFirstChunk() (gas: 29517535)
+[PASS] testDuplicateAcrossChunksWrongRootAndForeignSessionsAreRefused() (gas: 231631551)
+[PASS] testSingleLeafRoundCertifiesThroughTheChunkedPath() (gas: 398202)
+[PASS] testSingleShotRefusesButChunksCertifyAndCredit() (gas: 124071664)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 283.20ms (189.77ms CPU time)
+
+Ran 8 tests for test/Adversarial.t.sol:AdversarialTest
+[PASS] test100PercentAloneIsNotFullUnlock() (gas: 7307385)
+[PASS] testArbitraryHookDataAndMultihopPayloadCannotSelectVictim() (gas: 89207)
+[PASS] testCallbacksAllRequireCanonicalManager() (gas: 211512)
+[PASS] testForeignPoolKeyRejectedEvenWithManagerPrank() (gas: 49882)
+[PASS] testNoMintPauseBlacklistUpgradeOrCounterResetEntrypoint() (gas: 114793)
+[PASS] testProtocolFeeChangeCannotSilentlyAlterTradingEconomics() (gas: 357261)
+[PASS] testQuotaMultiplicationDoesNotOverflowAtMaxEligible() (gas: 239235)
+[PASS] testTokenMintsWholeSupplyToDeployerOnly() (gas: 32832)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 30.45ms (8.84ms CPU time)
+
+Ran 3 tests for test/SecurityRegression.t.sol:OracleOutageRegressionTest
+[PASS] testDepthDipInvalidatesWholeWindowAndRetainsReachedRights() (gas: 16312506)
+[PASS] testFinalTierRequiresItsOwnTwentyFourHours() (gas: 138827744)
+[PASS] testNextTierClockWaitsForItsOwnThreshold() (gas: 15293513)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 266.02ms (195.98ms CPU time)
+
+Ran 2 tests for test/SecurityRegression.t.sol:StagingCreationRegressionTest
+[PASS] testCounterfeitConstructorIsRefusedBeforeAnyDeployment() (gas: 6161976)
+[PASS] testOnlySetupAuthorityMayStageAndOnlyUntilActivation() (gas: 11784008)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 26.25ms (3.06ms CPU time)
 
 Ran 11 tests for test/NativeLaunch.t.sol:NativeWithdrawalTest
 [PASS] testDeepNativePoolWarmsUpAndCanUnlock() (gas: 136092723)
@@ -41,21 +78,12 @@ Ran 11 tests for test/NativeLaunch.t.sol:NativeWithdrawalTest
 [PASS] testOtherWalletCannotWithdrawNativeRefund() (gas: 459878)
 [PASS] testRejectingNativeWalletCanTradeAndRetryWithdrawal() (gas: 1073164)
 [PASS] testThinLaunchCannotUnlockFromInitialSpotOrTinyBuy() (gas: 29938965)
-Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 314.98ms (278.15ms CPU time)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 225.71ms (196.71ms CPU time)
 
-Ran 4 tests for test/ActivationRobustness.t.sol:ChunkedCertificationTest
-[PASS] testChunkBoundsAndSizeAreFixedByTheFirstChunk() (gas: 29517535)
-[PASS] testDuplicateAcrossChunksWrongRootAndForeignSessionsAreRefused() (gas: 231631551)
-[PASS] testSingleLeafRoundCertifiesThroughTheChunkedPath() (gas: 398202)
-[PASS] testSingleShotRefusesButChunksCertifyAndCredit() (gas: 124071664)
-Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 245.19ms (160.91ms CPU time)
-
-Ran 4 tests for test/SecurityRegression.t.sol:CodeAuthenticationRegressionTest
-[PASS] testActivationExternalFailureRollsBackEveryBinding() (gas: 913067)
-[PASS] testInconsistentImmutablePatchesAreRejected() (gas: 1782922)
-[PASS] testLaterFactoryDonationsCannotRewriteInitialAllocationReceipts() (gas: 688991)
-[PASS] testRuntimeMutationCannotPassGetterChecks() (gas: 84703)
-Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 58.99ms (9.33ms CPU time)
+Ran 2 tests for test/Stage2Script.t.sol:Stage2ScriptTest
+[PASS] testStage2DeploysFromActualIdentitiesAndOwnerActivates() (gas: 6832294)
+[PASS] testStage2RefusesUnknownLaunchNumber() (gas: 33767)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 64.77ms (2.11ms CPU time)
 
 Ran 17 tests for test/Oracle.t.sol:OracleTest
 [PASS] testBadChainlinkRoundsAndAnswersFailClosed() (gas: 2352246)
@@ -75,81 +103,54 @@ Ran 17 tests for test/Oracle.t.sol:OracleTest
 [PASS] testSustainedManipulationRequiresWindowAndConfirmation() (gas: 15126515)
 [PASS] testThresholdMappingBoundaries() (gas: 69776)
 [PASS] testWarmupAndExactWindow() (gas: 400906)
-Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 377.69ms (317.61ms CPU time)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 305.96ms (242.40ms CPU time)
 
-Ran 8 tests for test/Adversarial.t.sol:AdversarialTest
-[PASS] test100PercentAloneIsNotFullUnlock() (gas: 7307385)
-[PASS] testArbitraryHookDataAndMultihopPayloadCannotSelectVictim() (gas: 89207)
-[PASS] testCallbacksAllRequireCanonicalManager() (gas: 211512)
-[PASS] testForeignPoolKeyRejectedEvenWithManagerPrank() (gas: 49882)
-[PASS] testNoMintPauseBlacklistUpgradeOrCounterResetEntrypoint() (gas: 114793)
-[PASS] testProtocolFeeChangeCannotSilentlyAlterTradingEconomics() (gas: 357261)
-[PASS] testQuotaMultiplicationDoesNotOverflowAtMaxEligible() (gas: 239235)
-[PASS] testTokenMintsWholeSupplyToDeployerOnly() (gas: 32832)
-Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 63.92ms (17.10ms CPU time)
+Ran 1 test for test/StageOneInvariants.t.sol:StageOneInvariantTest
+[PASS]
+StageOneInvariantTest invariants:
+[PASS] invariant_onlyTheAuthorizedCallActivates
+[PASS] invariant_tokenAndClaimsIndependentOfTheHook
+[PASS] invariant_unconfiguredPoolIsInert
+ StageOneInvariantTest invariants (runs: 96, calls: 3840, reverts: 0)
 
-Ran 4 tests for test/SecurityRegression.t.sol:EvidenceCertificationRegressionTest
-[PASS] testActualLaterRoundClaimsHaveNoArtificialCumulativeCeiling() (gas: 1510126)
-[PASS] testDuplicateRecipientCannotOvercreditSmallerActualClaim() (gas: 441218)
-[PASS] testIncompleteTreeCannotBeCertified() (gas: 59593)
-[PASS] testOddTreeReconstructionAndPreCertificationNativeClaim() (gas: 580532)
-Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 46.97ms (2.24ms CPU time)
+╭-----------------+------------------+-------+---------+----------╮
+| Contract        | Selector         | Calls | Reverts | Discards |
++=================================================================+
+| StageOneHandler | advance          | 480   | 0       | 0        |
+|-----------------+------------------+-------+---------+----------|
+| StageOneHandler | attemptActivate  | 448   | 0       | 0        |
+|-----------------+------------------+-------+---------+----------|
+| StageOneHandler | claimAndAttest   | 480   | 0       | 0        |
+|-----------------+------------------+-------+---------+----------|
+| StageOneHandler | directSwap       | 484   | 0       | 0        |
+|-----------------+------------------+-------+---------+----------|
+| StageOneHandler | foreignLiquidity | 502   | 0       | 0        |
+|-----------------+------------------+-------+---------+----------|
+| StageOneHandler | routerSwap       | 511   | 0       | 0        |
+|-----------------+------------------+-------+---------+----------|
+| StageOneHandler | syncAndMilestone | 468   | 0       | 0        |
+|-----------------+------------------+-------+---------+----------|
+| StageOneHandler | transfer         | 467   | 0       | 0        |
+╰-----------------+------------------+-------+---------+----------╯
 
-Ran 3 tests for test/SecurityRegression.t.sol:OracleOutageRegressionTest
-[PASS] testDepthDipInvalidatesWholeWindowAndRetainsReachedRights() (gas: 16312506)
-[PASS] testFinalTierRequiresItsOwnTwentyFourHours() (gas: 138827744)
-[PASS] testNextTierClockWaitsForItsOwnThreshold() (gas: 15293513)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 278.77ms (223.54ms CPU time)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.33s (1.30s CPU time)
 
-Ran 10 tests for test/CreditsAndFees.t.sol:CreditsAndFeesTest
-[PASS] testAttestationRequiresActualClaimAndExactLeaf() (gas: 438961)
-[PASS] testClaimTransferAndPayerTransferDoNotDuplicateCredit() (gas: 577960)
-[PASS] testFeeCollectionDoesNotReducePrincipal() (gas: 646031)
-[PASS] testNativeClaimNeverDependsOnAdapterOrFeed() (gas: 846757)
-[PASS] testNativeClaimThenAttestThenSyncThenSale() (gas: 1280110)
-[PASS] testNegativeLiquidityForbiddenEvenForFactory() (gas: 82464)
-[PASS] testProofReleaseAndDedupRemainNativeRules() (gas: 573172)
-[PASS] testSaleFeesCountGrossInputAndNeverCreditFeeRecipients() (gas: 1188451)
-[PASS] testUnauthorizedLiquidityAndDonationNoCredit() (gas: 232025)
-[PASS] testUnclaimedRewardsNotEligible() (gas: 39399)
-Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 54.14ms (6.38ms CPU time)
-
-Ran 2 tests for test/SecurityRegression.t.sol:StagingCreationRegressionTest
-[PASS] testCounterfeitConstructorIsRefusedBeforeAnyDeployment() (gas: 6161976)
-[PASS] testOnlySetupAuthorityMayStageAndOnlyUntilActivation() (gas: 11784008)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 56.95ms (5.24ms CPU time)
-
-Ran 3 tests for test/ReleaseConfig.t.sol:ReleaseConfigTest
-[PASS] testReadOnlyReleaseChecksOnLocalFixture() (gas: 2011487)
-[PASS] testReadOnlyReleaseChecksRejectWrongChainOrHash() (gas: 1903758)
-[PASS] testStageOneAloneCannotPassReleaseGate() (gas: 74944069)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 180.63ms (119.13ms CPU time)
-
-Ran 5 tests for test/EvidenceAndOracleProperties.t.sol:MultiLeafEvidenceTest
-[PASS] testDecreasingEvidenceCannotRevokePreviouslyCreditedClaims() (gas: 1100787)
-[PASS] testProofsFromTheActualTreeCreditExactlyWhatWasDelivered() (gas: 2298120)
-[PASS] testSiblingCannotAttestAnotherWalletsClaim() (gas: 771379)
-[PASS] testSweptRoundFreezesEvidence() (gas: 1136221)
-[PASS] testTheTreeIsWellFormed() (gas: 40973)
-Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 47.72ms (4.58ms CPU time)
-
-Ran 2 tests for test/Stage2Script.t.sol:Stage2ScriptTest
-[PASS] testStage2DeploysFromActualIdentitiesAndOwnerActivates() (gas: 6832294)
-[PASS] testStage2RefusesUnknownLaunchNumber() (gas: 33767)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 54.72ms (3.18ms CPU time)
-
-Ran 1 test for test/EvidenceAndOracleProperties.t.sol:RouterDeadlineTest
-[PASS] testDeadlineIsInclusive() (gas: 422030)
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 47.43ms (783.75µs CPU time)
+Ran 9 tests for test/Trading.t.sol:TradingTest
+[PASS] testAnotherWalletCannotConsumeVictimsAllowanceOrQuota() (gas: 470687)
+[PASS] testDirectManagerAndForeignRouterSpoofingRejected() (gas: 644028)
+[PASS] testDonatedRouterBalancesCannotCreateCreditOrBeSwept() (gas: 496022)
+[PASS] testExactOutputSaleAccountsActualInput() (gas: 732168)
+[PASS] testExcessSaleRollsBackPoolBalancesOracleAndNonce() (gas: 797176)
+[PASS] testFuzzQuotaBoundary(uint96) (runs: 256, μ: 1032799, ~: 1032869)
+[PASS] testReplayOldCallbackHasNoLiveContext() (gas: 425843)
+[PASS] testSaleBoundaryExecutedInputIncludesPoolFee() (gas: 1062165)
+[PASS] testTransfersDoNotMoveRightsOrAllowChainCredit() (gas: 827129)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 392.36ms (369.72ms CPU time)
 
 Ran 2 tests for test/TwoStage.t.sol:StageOneConstructorTest
-[PASS] testConstructorRejectsMissingOrConflatedInputs() (gas: 8175)
+[PASS] testConstructorRejectsMissingOrConflatedInputs() (gas: 8207)
 [PASS] testOnlyFactoryCanInitializeTheHooksPool() (gas: 43150)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 37.90ms (347.77µs CPU time)
-
-Ran 1 test for test/FailurePaths.t.sol:UnpaidLaunchTest
-[PASS] testNoRequesterMeansNoPayerCreditAnywhere() (gas: 1264616)
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 45.43ms (1.60ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 18.50ms (1.45ms CPU time)
 
 Ran 13 tests for test/TwoStage.t.sol:StageOneTest
 [PASS] testActivationSealsAndCannotBeReplayed() (gas: 5901690)
@@ -165,152 +166,13 @@ Ran 13 tests for test/TwoStage.t.sol:StageOneTest
 [PASS] testTransfersAndNativeClaimsWorkBeforeActivationAndClaimIsCreditedLater() (gas: 6199971)
 [PASS] testUnauthorizedActivationRejected() (gas: 5373249)
 [PASS] testWrongContractsRejected() (gas: 6061423)
-Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 89.54ms (46.46ms CPU time)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 75.44ms (54.96ms CPU time)
 
-Ran 2 tests for test/LocalScript.t.sol:LocalScriptTest
-[PASS] testLocalScriptRefusesPublicChainId() (gas: 13945506)
-[PASS] testLocalSimulationFunctionDoesNotDependOnCaller() (gas: 67855480)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 35.77ms (34.81ms CPU time)
-
-Ran 3 tests for test/EvidenceAndOracleProperties.t.sol:OracleReferenceTest
-[PASS] testCheckpointReplacementRewritesOnlyTheCurrentSecond() (gas: 994219)
-[PASS] testFuzzFdvIsMonotonicInTheEthUsdAnswer(uint64,uint64) (runs: 256, μ: 750242, ~: 750529)
-[PASS] testFuzzTwapMatchesBruteForceReference(uint256) (runs: 160, μ: 2760246, ~: 2781459)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 938.36ms (892.83ms CPU time)
-
-Ran 3 tests for test/ManipulationEconomics.t.sol:ManipulationEconomicsTest
-[PASS] testCounterSellingOfAllInitialNonPoolTokens() (gas: 157719009)
-[PASS] testPayerCanRecaptureItsNativeFeeShare() (gas: 144653849)
-[PASS] testSustainedManipulationUnlockAndExit() (gas: 144667569)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 695.88ms (638.16ms CPU time)
-
-Ran 8 tests for test/Launch.t.sol:LaunchTest
-[PASS] testCompanionsAreImmutablyBound() (gas: 37886)
-[PASS] testFactoryHoldsPrincipalAndCannotRemoveIt() (gas: 333697)
-[PASS] testLaunchAllocationAndLockedPrincipal() (gas: 191055)
-[PASS] testLaunchIsOnceAndDeployerOnly() (gas: 2730017)
-[PASS] testOnlyCanonicalManagerCanCallHook() (gas: 66479)
-[PASS] testPayerCreditExactDeduplicated() (gas: 137462)
-[PASS] testUnauthorizedFactoryAndWrongPoolRejected() (gas: 80623)
-[PASS] testUnconfiguredComponentsFailClosed() (gas: 42307)
-Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 48.32ms (2.27ms CPU time)
-
-Ran 9 tests for test/Trading.t.sol:TradingTest
-[PASS] testAnotherWalletCannotConsumeVictimsAllowanceOrQuota() (gas: 470687)
-[PASS] testDirectManagerAndForeignRouterSpoofingRejected() (gas: 644028)
-[PASS] testDonatedRouterBalancesCannotCreateCreditOrBeSwept() (gas: 496022)
-[PASS] testExactOutputSaleAccountsActualInput() (gas: 732168)
-[PASS] testExcessSaleRollsBackPoolBalancesOracleAndNonce() (gas: 797176)
-[PASS] testFuzzQuotaBoundary(uint96) (runs: 256, μ: 1032816, ~: 1032869)
-[PASS] testReplayOldCallbackHasNoLiveContext() (gas: 425843)
-[PASS] testSaleBoundaryExecutedInputIncludesPoolFee() (gas: 1062165)
-[PASS] testTransfersDoNotMoveRightsOrAllowChainCredit() (gas: 827129)
-Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 310.53ms (261.65ms CPU time)
-
-Ran 1 test for test/StageOneInvariants.t.sol:StageOneInvariantTest
-[PASS]
-StageOneInvariantTest invariants:
-[PASS] invariant_onlyTheAuthorizedCallActivates
-[PASS] invariant_tokenAndClaimsIndependentOfTheHook
-[PASS] invariant_unconfiguredPoolIsInert
- StageOneInvariantTest invariants (runs: 96, calls: 3840, reverts: 0)
-
-╭-----------------+------------------+-------+---------+----------╮
-| Contract        | Selector         | Calls | Reverts | Discards |
-+=================================================================+
-| StageOneHandler | advance          | 483   | 0       | 0        |
-|-----------------+------------------+-------+---------+----------|
-| StageOneHandler | attemptActivate  | 503   | 0       | 0        |
-|-----------------+------------------+-------+---------+----------|
-| StageOneHandler | claimAndAttest   | 455   | 0       | 0        |
-|-----------------+------------------+-------+---------+----------|
-| StageOneHandler | directSwap       | 457   | 0       | 0        |
-|-----------------+------------------+-------+---------+----------|
-| StageOneHandler | foreignLiquidity | 493   | 0       | 0        |
-|-----------------+------------------+-------+---------+----------|
-| StageOneHandler | routerSwap       | 475   | 0       | 0        |
-|-----------------+------------------+-------+---------+----------|
-| StageOneHandler | syncAndMilestone | 480   | 0       | 0        |
-|-----------------+------------------+-------+---------+----------|
-| StageOneHandler | transfer         | 494   | 0       | 0        |
-╰-----------------+------------------+-------+---------+----------╯
-
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.78s (1.73s CPU time)
-
-Ran 17 tests for test/FailurePaths.t.sol:RouterAndHookFailurePathsTest
-[PASS] testBatchBoundsAndValueMustMatch() (gas: 186758)
-[PASS] testBatchIsAtomicWhenALaterStepFails() (gas: 830450)
-[PASS] testConfirmationRequiresSixHoursAndCannotSkipTiers() (gas: 15340175)
-[PASS] testFullUnlockKeepsFeesAndRouterAuthentication() (gas: 137004282)
-[PASS] testFuzzOperationHashBindsTraderNonceAndChain(address,uint256,uint64) (runs: 256, μ: 17656, ~: 17656)
-[PASS] testFuzzRemainingQuotaFormula(uint128,uint128,uint8) (runs: 512, μ: 7293378, ~: 7293546)
-[PASS] testFuzzTierIsMonotonicInFdv(uint256,uint256) (runs: 512, μ: 16964, ~: 16923)
-[PASS] testFuzzTransfersMoveExactlyTheAmount(address,uint96) (runs: 256, μ: 122020, ~: 122475)
-[PASS] testHookRejectsMalformedRouteDataAndUnknownSenders() (gas: 238753)
-[PASS] testPartialFillAtPriceLimitChargesOnlyExecutedInput() (gas: 1208964)
-[PASS] testQuotaWidensWithTierAndNeverDoubleCounts() (gas: 16785891)
-[PASS] testRequesterChangeAfterActivationDoesNotMoveThePayer() (gas: 146383)
-[PASS] testRouterCallbackNeedsALiveSwap() (gas: 73817)
-[PASS] testRouterRefusesDegenerateRequests() (gas: 500273)
-[PASS] testSecondRoundClaimsAccumulateOncePerRound() (gas: 995639)
-[PASS] testSlippageRefusalsLeaveNoTrace() (gas: 895597)
-[PASS] testSyncForStrangerAndZeroAddressCreatesNothing() (gas: 108400)
-Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 3.95s (3.97s CPU time)
-
-Ran 1 test for test/Invariants.t.sol:SystemInvariantTest
-[PASS]
-SystemInvariantTest invariants:
-[PASS] invariantEligibleEqualsOnlyExecutedBuysAndSynchronizedProofs
-[PASS] invariantNoActorExceedsItsQuotaBeforeUnlock
-[PASS] invariantPrincipalLiquidityNeverDecreases
-[PASS] invariantSupplyConservedAndRouterHasNoCustody
- SystemInvariantTest invariants (runs: 128, calls: 5120, reverts: 0)
-
-╭---------------+----------+-------+---------+----------╮
-| Contract      | Selector | Calls | Reverts | Discards |
-+=======================================================+
-| ActionHandler | advance  | 842   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | buy      | 915   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | claim    | 866   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | sell     | 817   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | sync     | 854   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | transfer | 826   | 0       | 0        |
-╰---------------+----------+-------+---------+----------╯
-
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 4.89s (4.81s CPU time)
-
-Ran 1 test for test/Invariants.t.sol:FullyUnlockedInvariantTest
-[PASS]
-FullyUnlockedInvariantTest invariants:
-[PASS] invariantEligibleEqualsOnlyExecutedBuysAndSynchronizedProofs
-[PASS] invariantNoActorExceedsItsQuotaBeforeUnlock
-[PASS] invariantPrincipalLiquidityNeverDecreases
-[PASS] invariantSupplyConservedAndRouterHasNoCustody
-[PASS] invariantUnlockRemainsPermanentDespiteInvalidFeed
- FullyUnlockedInvariantTest invariants (runs: 128, calls: 5120, reverts: 0)
-
-╭---------------+----------+-------+---------+----------╮
-| Contract      | Selector | Calls | Reverts | Discards |
-+=======================================================+
-| ActionHandler | advance  | 842   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | buy      | 915   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | claim    | 866   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | sell     | 817   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | sync     | 854   | 0       | 0        |
-|---------------+----------+-------+---------+----------|
-| ActionHandler | transfer | 826   | 0       | 0        |
-╰---------------+----------+-------+---------+----------╯
-
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 5.75s (5.30s CPU time)
+Ran 3 tests for test/FailurePaths.t.sol:ActivationFailurePathsTest
+[PASS] testCompanionConstructorsRejectMissingInputs() (gas: 6057)
+[PASS] testCrossLaunchSetupIsRefusedInEveryDirection() (gas: 31144365)
+[PASS] testSepoliaRefusesLocallyClonedServicesEvenWithFeedAtPublishedAddress() (gas: 676754)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 47.82ms (23.82ms CPU time)
 
 Ran 2 tests for test/QuotaInvariants.t.sol:QuotaInvariantTest
 [PASS]
@@ -327,38 +189,297 @@ QuotaInvariantTest invariants:
 ╭--------------+-----------------+-------+---------+----------╮
 | Contract     | Selector        | Calls | Reverts | Discards |
 +=============================================================+
-| QuotaHandler | advance         | 329   | 0       | 0        |
+| QuotaHandler | advance         | 369   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | buyExactIn      | 334   | 0       | 0        |
+| QuotaHandler | buyExactIn      | 362   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | buyExactOut     | 366   | 0       | 0        |
+| QuotaHandler | buyExactOut     | 365   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | claimAndAttest  | 410   | 0       | 0        |
+| QuotaHandler | claimAndAttest  | 329   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | claimFees       | 352   | 0       | 0        |
+| QuotaHandler | claimFees       | 365   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | directSwap      | 358   | 0       | 0        |
+| QuotaHandler | directSwap      | 386   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | donate          | 361   | 0       | 0        |
+| QuotaHandler | donate          | 369   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | foreignActivate | 376   | 0       | 0        |
+| QuotaHandler | foreignActivate | 374   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | sellExactOut    | 374   | 0       | 0        |
+| QuotaHandler | sellExactOut    | 362   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | sellOverQuota   | 367   | 0       | 0        |
+| QuotaHandler | sellOverQuota   | 348   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | sellWithinQuota | 738   | 0       | 0        |
+| QuotaHandler | sellWithinQuota | 743   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | setFeed         | 325   | 0       | 0        |
+| QuotaHandler | setFeed         | 339   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | sync            | 335   | 0       | 0        |
+| QuotaHandler | sync            | 350   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | transfer        | 347   | 0       | 0        |
+| QuotaHandler | transfer        | 367   | 0       | 0        |
 |--------------+-----------------+-------+---------+----------|
-| QuotaHandler | withdrawNative  | 388   | 0       | 0        |
+| QuotaHandler | withdrawNative  | 332   | 0       | 0        |
 ╰--------------+-----------------+-------+---------+----------╯
 
 [PASS] testHandlerActionsActuallyExecute() (gas: 23814275)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.63s (7.59s CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 4.77s (4.71s CPU time)
 
-Ran 30 test suites in 7.64s (28.66s CPU time): 154 tests passed, 0 failed, 0 skipped (154 total tests)
+Ran 3 tests for test/ReleaseConfig.t.sol:ReleaseConfigTest
+[PASS] testReadOnlyReleaseChecksOnLocalFixture() (gas: 2011487)
+[PASS] testReadOnlyReleaseChecksRejectWrongChainOrHash() (gas: 1903758)
+[PASS] testStageOneAloneCannotPassReleaseGate() (gas: 75663436)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 75.84ms (52.83ms CPU time)
+
+Ran 2 tests for test/RevisionProperties.t.sol:ChunkedCertificationPropertiesTest
+[PASS] testFuzz_abandonedSessionIsInertAndRestartable(uint8,uint256) (runs: 128, μ: 2662745, ~: 2136002)
+[PASS] testFuzz_anyChunkingAndReductionScheduleMatchesSingleShot(uint8,uint256,uint256,uint256,uint8,uint8) (runs: 128, μ: 3811050, ~: 3197002)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 246.02ms (223.50ms CPU time)
+
+Ran 17 tests for test/FailurePaths.t.sol:RouterAndHookFailurePathsTest
+[PASS] testBatchBoundsAndValueMustMatch() (gas: 186758)
+[PASS] testBatchIsAtomicWhenALaterStepFails() (gas: 830450)
+[PASS] testConfirmationRequiresSixHoursAndCannotSkipTiers() (gas: 15340175)
+[PASS] testFullUnlockKeepsFeesAndRouterAuthentication() (gas: 137004282)
+[PASS] testFuzzOperationHashBindsTraderNonceAndChain(address,uint256,uint64) (runs: 256, μ: 17656, ~: 17656)
+[PASS] testFuzzRemainingQuotaFormula(uint128,uint128,uint8) (runs: 512, μ: 7293356, ~: 7293203)
+[PASS] testFuzzTierIsMonotonicInFdv(uint256,uint256) (runs: 512, μ: 16958, ~: 16923)
+[PASS] testFuzzTransfersMoveExactlyTheAmount(address,uint96) (runs: 256, μ: 122169, ~: 122463)
+[PASS] testHookRejectsMalformedRouteDataAndUnknownSenders() (gas: 238753)
+[PASS] testPartialFillAtPriceLimitChargesOnlyExecutedInput() (gas: 1208964)
+[PASS] testQuotaWidensWithTierAndNeverDoubleCounts() (gas: 16785891)
+[PASS] testRequesterChangeAfterActivationDoesNotMoveThePayer() (gas: 146383)
+[PASS] testRouterCallbackNeedsALiveSwap() (gas: 73817)
+[PASS] testRouterRefusesDegenerateRequests() (gas: 500273)
+[PASS] testSecondRoundClaimsAccumulateOncePerRound() (gas: 995639)
+[PASS] testSlippageRefusalsLeaveNoTrace() (gas: 895597)
+[PASS] testSyncForStrangerAndZeroAddressCreatesNothing() (gas: 108400)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 4.30s (4.26s CPU time)
+
+Ran 1 test for test/FailurePaths.t.sol:UnpaidLaunchTest
+[PASS] testNoRequesterMeansNoPayerCreditAnywhere() (gas: 1264616)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 26.56ms (1.02ms CPU time)
+
+Ran 5 tests for test/HookDeployer.t.sol:HookDeployerTest
+[PASS] testChangedCreationBodyCannotMatchReviewedHash() (gas: 135884)
+[PASS] testChangedSetupAuthorityChangesHashAndCreate2Prediction() (gas: 226190)
+[PASS] testDeployedHelperFitsEvmCodeLimits() (gas: 8947)
+[PASS] testFuzzEncodesCallerSuppliedBytesAndFourAddresses(bytes,address,address,address,address) (runs: 256, μ: 20400, ~: 20352)
+[PASS] testReviewedHookInitCodeAndHash() (gas: 196590)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 10.66ms (10.17ms CPU time)
+
+Ran 2 tests for test/RevisionProperties.t.sol:MilestoneSampleInvariantTest
+[PASS]
+MilestoneSampleInvariantTest invariants:
+[PASS] invariant_confirmationNeedsAnUnbrokenChainOfValidSamples
+[PASS] invariant_invalidSamplesNeverAdvanceTiers
+[PASS] invariant_nothingEverRelocksAndStateIsConsistent
+ MilestoneSampleInvariantTest invariants (runs: 48, calls: 1920, reverts: 0)
+
+╭------------------------+----------+-------+---------+----------╮
+| Contract               | Selector | Calls | Reverts | Discards |
++================================================================+
+| MilestoneSampleHandler | advance  | 307   | 0       | 0        |
+|------------------------+----------+-------+---------+----------|
+| MilestoneSampleHandler | corrupt  | 367   | 0       | 0        |
+|------------------------+----------+-------+---------+----------|
+| MilestoneSampleHandler | heal     | 320   | 0       | 0        |
+|------------------------+----------+-------+---------+----------|
+| MilestoneSampleHandler | march    | 298   | 0       | 0        |
+|------------------------+----------+-------+---------+----------|
+| MilestoneSampleHandler | sample   | 325   | 0       | 0        |
+|------------------------+----------+-------+---------+----------|
+| MilestoneSampleHandler | setPrice | 303   | 0       | 0        |
+╰------------------------+----------+-------+---------+----------╯
+
+[PASS] testHandlerReachesTiersAndEveryCorruptionIsInvalid() (gas: 12640787)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 2.40s (2.37s CPU time)
+
+Ran 1 test for test/RevisionProperties.t.sol:RestagingIsolationTest
+[PASS] testAbandonedBundleIsInertAndMixedBundlesAreRefused() (gas: 6919999)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 25.08ms (1.65ms CPU time)
+
+Ran 2 tests for test/RevisionProperties.t.sol:SeedGatePropertiesTest
+[PASS] testFuzz_launchedSeedIsAlwaysLiquidAndRefusedSeedIsAlwaysBelowFloor(uint8) (runs: 96, μ: 10804849, ~: 9043298)
+[PASS] testFuzz_poolShareBandDecidesLaunchAndActivation(uint16) (runs: 96, μ: 11382639, ~: 9040782)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 240.18ms (221.89ms CPU time)
+
+Ran 1 test for test/Invariants.t.sol:FullyUnlockedInvariantTest
+[PASS]
+FullyUnlockedInvariantTest invariants:
+[PASS] invariantEligibleEqualsOnlyExecutedBuysAndSynchronizedProofs
+[PASS] invariantNoActorExceedsItsQuotaBeforeUnlock
+[PASS] invariantPrincipalLiquidityNeverDecreases
+[PASS] invariantSupplyConservedAndRouterHasNoCustody
+[PASS] invariantUnlockRemainsPermanentDespiteInvalidFeed
+ FullyUnlockedInvariantTest invariants (runs: 128, calls: 5120, reverts: 0)
+
+╭---------------+----------+-------+---------+----------╮
+| Contract      | Selector | Calls | Reverts | Discards |
++=======================================================+
+| ActionHandler | advance  | 830   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | buy      | 885   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | claim    | 854   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | sell     | 852   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | sync     | 830   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | transfer | 869   | 0       | 0        |
+╰---------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.49s (2.29s CPU time)
+
+Ran 1 test for test/Invariants.t.sol:SystemInvariantTest
+[PASS]
+SystemInvariantTest invariants:
+[PASS] invariantEligibleEqualsOnlyExecutedBuysAndSynchronizedProofs
+[PASS] invariantNoActorExceedsItsQuotaBeforeUnlock
+[PASS] invariantPrincipalLiquidityNeverDecreases
+[PASS] invariantSupplyConservedAndRouterHasNoCustody
+ SystemInvariantTest invariants (runs: 128, calls: 5120, reverts: 0)
+
+╭---------------+----------+-------+---------+----------╮
+| Contract      | Selector | Calls | Reverts | Discards |
++=======================================================+
+| ActionHandler | advance  | 830   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | buy      | 885   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | claim    | 854   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | sell     | 852   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | sync     | 830   | 0       | 0        |
+|---------------+----------+-------+---------+----------|
+| ActionHandler | transfer | 869   | 0       | 0        |
+╰---------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.42s (2.38s CPU time)
+
+Ran 8 tests for test/Launch.t.sol:LaunchTest
+[PASS] testCompanionsAreImmutablyBound() (gas: 37886)
+[PASS] testFactoryHoldsPrincipalAndCannotRemoveIt() (gas: 333697)
+[PASS] testLaunchAllocationAndLockedPrincipal() (gas: 191055)
+[PASS] testLaunchIsOnceAndDeployerOnly() (gas: 2730017)
+[PASS] testOnlyCanonicalManagerCanCallHook() (gas: 66479)
+[PASS] testPayerCreditExactDeduplicated() (gas: 137462)
+[PASS] testUnauthorizedFactoryAndWrongPoolRejected() (gas: 80623)
+[PASS] testUnconfiguredComponentsFailClosed() (gas: 42307)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 26.40ms (2.34ms CPU time)
+
+Ran 2 tests for test/LocalScript.t.sol:LocalScriptTest
+[PASS] testLocalScriptRefusesPublicChainId() (gas: 13983272)
+[PASS] testLocalSimulationFunctionDoesNotDependOnCaller() (gas: 68079045)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 11.93ms (11.46ms CPU time)
+
+Ran 3 tests for test/ManipulationEconomics.t.sol:ManipulationEconomicsTest
+[PASS] testCounterSellingOfAllInitialNonPoolTokens() (gas: 157719009)
+[PASS] testPayerCanRecaptureItsNativeFeeShare() (gas: 144653849)
+[PASS] testSustainedManipulationUnlockAndExit() (gas: 144667569)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 357.15ms (335.12ms CPU time)
+
+Ran 5 tests for test/BatchSettlementProperties.t.sol:BatchSettlementPropertiesTest
+[PASS] testFuzz_BatchEqualsSequentialExecution(uint256,uint8,bool) (runs: 1000, μ: 4548549, ~: 4046657)
+[PASS] testFuzz_FailureAtAnyBatchIndexRestoresAllowancesFeesAndCredits(uint256,uint8) (runs: 1000, μ: 11370078, ~: 11049287)
+[PASS] test_MaximumMixedBatchOnFreshTokenOnlyManager() (gas: 9205385)
+[PASS] test_OneWeiShortAllowanceRestoresEntireBatchAndRetryWorks() (gas: 1867639)
+[PASS] test_PartialSaleMayPrefundMoreThanQuotaButChargesOnlyExecution() (gas: 903643)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 19.83s (19.81s CPU time)
+
+Ran 5 tests for test/EvidenceAndOracleProperties.t.sol:MultiLeafEvidenceTest
+[PASS] testDecreasingEvidenceCannotRevokePreviouslyCreditedClaims() (gas: 1100787)
+[PASS] testProofsFromTheActualTreeCreditExactlyWhatWasDelivered() (gas: 2298120)
+[PASS] testSiblingCannotAttestAnotherWalletsClaim() (gas: 771379)
+[PASS] testSweptRoundFreezesEvidence() (gas: 1136221)
+[PASS] testTheTreeIsWellFormed() (gas: 40973)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 30.05ms (2.90ms CPU time)
+
+Ran 3 tests for test/EvidenceAndOracleProperties.t.sol:OracleReferenceTest
+[PASS] testCheckpointReplacementRewritesOnlyTheCurrentSecond() (gas: 994219)
+[PASS] testFuzzFdvIsMonotonicInTheEthUsdAnswer(uint64,uint64) (runs: 256, μ: 750289, ~: 750529)
+[PASS] testFuzzTwapMatchesBruteForceReference(uint256) (runs: 160, μ: 2849270, ~: 2825351)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 601.01ms (574.80ms CPU time)
+
+Ran 1 test for test/EvidenceAndOracleProperties.t.sol:RouterDeadlineTest
+[PASS] testDeadlineIsInclusive() (gas: 422030)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 26.12ms (512.14µs CPU time)
+
+Ran 10 tests for test/CreditsAndFees.t.sol:CreditsAndFeesTest
+[PASS] testAttestationRequiresActualClaimAndExactLeaf() (gas: 438961)
+[PASS] testClaimTransferAndPayerTransferDoNotDuplicateCredit() (gas: 577960)
+[PASS] testFeeCollectionDoesNotReducePrincipal() (gas: 646031)
+[PASS] testNativeClaimNeverDependsOnAdapterOrFeed() (gas: 846757)
+[PASS] testNativeClaimThenAttestThenSyncThenSale() (gas: 1280110)
+[PASS] testNegativeLiquidityForbiddenEvenForFactory() (gas: 82464)
+[PASS] testProofReleaseAndDedupRemainNativeRules() (gas: 573172)
+[PASS] testSaleFeesCountGrossInputAndNeverCreditFeeRecipients() (gas: 1188451)
+[PASS] testUnauthorizedLiquidityAndDonationNoCredit() (gas: 232025)
+[PASS] testUnclaimedRewardsNotEligible() (gas: 39399)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 31.17ms (4.25ms CPU time)
+
+Ran 2 tests for test/ClaimLifecycleInvariants.t.sol:ClaimLifecycleInvariantsTest
+[PASS]
+ClaimLifecycleInvariantsTest invariants:
+[PASS] invariant_DistributorReservesAndCashMatchIndependentRoundModel
+[PASS] invariant_FixedSupplyAndInitialReceiptsSurviveAllClaimSequences
+[PASS] invariant_OnlyDeliveredAttestedAndSyncedClaimsCreateRights
+ ClaimLifecycleInvariantsTest invariants (runs: 256, calls: 20480, reverts: 0)
+
+╭-----------------------+-------------------+-------+---------+----------╮
+| Contract              | Selector          | Calls | Reverts | Discards |
++========================================================================+
+| ClaimLifecycleHandler | advance           | 1827  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | attest            | 1845  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | certify           | 1819  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | claim             | 1863  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | deliverAndSync    | 1896  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | openRound         | 1865  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | sweep             | 1889  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | sync              | 1841  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | syncPayer         | 1907  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | transferOrDonate  | 1858  | 0       | 0        |
+|-----------------------+-------------------+-------+---------+----------|
+| ClaimLifecycleHandler | unauthorizedRound | 1870  | 0       | 0        |
+╰-----------------------+-------------------+-------+---------+----------╯
+
+[PASS] test_ModelExercisesDelayedCertificationSweepsAndRecycledFunding() (gas: 4966220)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 13.74s (13.71s CPU time)
+
+Ran 2 tests for test/NativeCustodyInvariants.t.sol:NativeCustodyInvariantsTest
+[PASS]
+NativeCustodyInvariantsTest invariants:
+[PASS] invariant_ManagerHasNoUnsettledDeltaOrReusableRouteContext
+[PASS] invariant_NativeLiabilitiesRemainFullyBackedAndBelongToTheirWallet
+[PASS] invariant_TransfersDonationsAndFailedBatchesCannotCreateOrMoveRights
+ NativeCustodyInvariantsTest invariants (runs: 256, calls: 16384, reverts: 0)
+
+╭----------------------+--------------+-------+---------+----------╮
+| Contract             | Selector     | Calls | Reverts | Discards |
++==================================================================+
+| NativeCustodyHandler | donateTokens | 2726  | 0       | 0        |
+|----------------------+--------------+-------+---------+----------|
+| NativeCustodyHandler | failBatch    | 2779  | 0       | 0        |
+|----------------------+--------------+-------+---------+----------|
+| NativeCustodyHandler | forceEther   | 2716  | 0       | 0        |
+|----------------------+--------------+-------+---------+----------|
+| NativeCustodyHandler | tradeBatch   | 2790  | 0       | 0        |
+|----------------------+--------------+-------+---------+----------|
+| NativeCustodyHandler | transfer     | 2716  | 0       | 0        |
+|----------------------+--------------+-------+---------+----------|
+| NativeCustodyHandler | withdraw     | 2657  | 0       | 0        |
+╰----------------------+--------------+-------+---------+----------╯
+
+[PASS] test_HandlerTradesRejectsReentersAndDrainsWithoutTakingDonations() (gas: 5300451)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 14.61s (14.59s CPU time)
+
+Ran 38 test suites in 26.03s (69.96s CPU time): 175 tests passed, 0 failed, 0 skipped (175 total tests)

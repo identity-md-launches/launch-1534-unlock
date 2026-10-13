@@ -4,6 +4,11 @@
     "name": "initCode",
     "inputs": [
       {
+        "name": "hookCreationCode",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
         "name": "config",
         "type": "tuple",
         "internalType": "struct HookDeployer.Config",
@@ -44,6 +49,11 @@
     "type": "function",
     "name": "initCodeHash",
     "inputs": [
+      {
+        "name": "hookCreationCode",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
       {
         "name": "config",
         "type": "tuple",

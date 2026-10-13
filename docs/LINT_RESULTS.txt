@@ -12,6 +12,14 @@ warning[unsafe-typecast]: typecast can truncate values
     │       
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
+warning[reentrancy-no-eth]: external call can be reentered before `_status` is updated
+    ╭▸ src/UnlkSwapRouter.sol:139:31
+    │
+139 │         bytes memory result = poolManager.unlock(abi.encode(key, params, operationNonce, request.maxInput));
+    │                               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
 warning[unsafe-typecast]: typecast can truncate values
     ╭▸ src/UnlkOracle.sol:112:47
     │
@@ -75,14 +83,6 @@ warning[unsafe-typecast]: typecast can truncate values
     │       
     │       
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
-
-warning[reentrancy-no-eth]: external call can be reentered before `_status` is updated
-    ╭▸ src/UnlkSwapRouter.sol:139:31
-    │
-139 │         bytes memory result = poolManager.unlock(abi.encode(key, params, operationNonce, request.maxInput));
-    │                               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    │
-    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
 
 warning[unsafe-typecast]: typecast can truncate values
     ╭▸ src/UnlkOracle.sol:176:30
@@ -213,18 +213,18 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[uninitialized-local]: local variable is read before being initialized
-    ╭▸ src/UnlkHook.sol:416:47
-    │
-416 │                 if (addr != address(token) || tokenSeen) revert InvalidEvidence();
-    │                                               ━━━━━━━━━
-    │
-    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
-
-warning[uninitialized-local]: local variable is read before being initialized
     ╭▸ src/UnlkHook.sol:419:46
     │
 419 │                 if (addr != address(this) || hookSeen) revert InvalidEvidence();
     │                                              ━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/UnlkHook.sol:416:47
+    │
+416 │                 if (addr != address(token) || tokenSeen) revert InvalidEvidence();
+    │                                               ━━━━━━━━━
     │
     ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
 

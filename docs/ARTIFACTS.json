@@ -3,12 +3,14 @@
   "evmVersion": "cancun",
   "optimizerRuns": 200,
   "bytecodeHash": "none",
-  "sourceDigestListSha256": "54bfff77db39c0858f41f6a0647b1fd3904d444178ad79f1a11d0d3cf0c6c817",
+  "sourceDigestListSha256": "300461c651a31287915fcbe1d2e70183b130504f61938b6bf559240a1e750551",
   "warning": "Templates contain unresolved immutable values. These are NOT public deployment runtime hashes or a Git commit.",
   "contracts": {
     "UnlkToken": {
       "creationBodyBytes": 3444,
       "creationBodyKeccak256": "0x0ab695920f28775428475ff223b1c3e500d89a61f300ef39d4e7d091bb1d94d8",
+      "constructorArgsBytes": 0,
+      "initCodeBytes": 3444,
       "runtimeTemplateBytes": 2320,
       "runtimeTemplateKeccak256": "0xc617bd6158c9cd2c0b13fa548c6c6d2138363631df71bfefadf7c8160c8a03d6",
       "abiSha256": "d8aa3c2ee30aacb9d86a9ef1b73dd59911e835a0ac7faaf56b424ee95384d1ad"
@@ -16,6 +18,8 @@
     "UnlkHook": {
       "creationBodyBytes": 25702,
       "creationBodyKeccak256": "0xf872174773f0458defad7ad18888ab294bd88edb611e7fc793eaa833896bb336",
+      "constructorArgsBytes": 128,
+      "initCodeBytes": 25830,
       "runtimeTemplateBytes": 24328,
       "runtimeTemplateKeccak256": "0xb611b13fbad445fc6a083c56613137b92b8b04ce2ffe801ac71307794df3ccad",
       "abiSha256": "f519481845e934a876a9e63279803f43b079f5e112833843c93cb1dfd8f5db35"
@@ -23,6 +27,8 @@
     "UnlkSwapRouter": {
       "creationBodyBytes": 8102,
       "creationBodyKeccak256": "0xcb2ba312042a9f63518e6a3312f2dc9207785a89a012b6106c66c1dd19067d03",
+      "constructorArgsBytes": 64,
+      "initCodeBytes": 8166,
       "runtimeTemplateBytes": 7761,
       "runtimeTemplateKeccak256": "0xbb01eccd21daccb2a73f8b93253237745c1af015fa18bdc26d971533c8086d0b",
       "abiSha256": "76eb8edcb6b4a665f06c3944bba8cad4bb7d141d8e6e8f280c3144bf2573d2d6"
@@ -30,6 +36,8 @@
     "MerkleClaimEvidence": {
       "creationBodyBytes": 5943,
       "creationBodyKeccak256": "0x0e19b93cf4e406e2e314e1d0096790a4c37d580834c72bca0484cb1982c87113",
+      "constructorArgsBytes": 64,
+      "initCodeBytes": 6007,
       "runtimeTemplateBytes": 5675,
       "runtimeTemplateKeccak256": "0x84b198a923eca53df6fff6715027c89046b1a14c471a0e5c1d78d7b04d5ce1fe",
       "abiSha256": "608cee018c3c6b99b24a7236d1c1d08a51507932b99dbe186bfc55bd8f8c2240"
@@ -37,16 +45,20 @@
     "UnlkOracle": {
       "creationBodyBytes": 7857,
       "creationBodyKeccak256": "0x824e95f2cea0b9ee1b6a222df8472c75808c64f44969768332d114c078eae897",
+      "constructorArgsBytes": 96,
+      "initCodeBytes": 7953,
       "runtimeTemplateBytes": 7517,
       "runtimeTemplateKeccak256": "0x643fa9e4d0c4cc8c71990a70e0c3063005b61c8443a811138ab8835225dc79b3",
       "abiSha256": "290cffdef5222ddc4d0b65a8ba4d2d201ab980c1179fb7e9c680313728129fa9"
     },
     "HookDeployer": {
-      "creationBodyBytes": 26292,
-      "creationBodyKeccak256": "0x5f506992990dacfcf23bf4e8e5547182c432fb0263fe8f75171cf8fbf0b075cb",
-      "runtimeTemplateBytes": 26264,
-      "runtimeTemplateKeccak256": "0x658a4b7fd57ede5e26e1487f34492ba8655fa44059a89f5feb83a6ed4f9e8fc4",
-      "abiSha256": "c8add1f1175a54a1b7d63e3e580f73780c76476da05effadc80a6b09946cfce7"
+      "creationBodyBytes": 756,
+      "creationBodyKeccak256": "0x71e1feb17c1a2a0c06dcfc4f2f6c6e5c22da6284ae464e18f7bac2aa0c8b8094",
+      "constructorArgsBytes": 0,
+      "initCodeBytes": 756,
+      "runtimeTemplateBytes": 728,
+      "runtimeTemplateKeccak256": "0xc606090ae4ad0fb2d50a69285faad5d8b0f05127c5129caa24b771f18dee2db1",
+      "abiSha256": "3bd9fe2c0ff0c3390632293cae1892377a8da02f343448478c880ac872ff26c5"
     }
   }
 }

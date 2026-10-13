@@ -1,5 +1,10 @@
 # Adversarial review and release limitations
 
+The launch-1534 size fix changes only the pure encoding helper and its callers/checks. Production contract
+bytecode is unchanged. It does not resolve or accept the protocol-fee halt, treasury reward-round powers or
+manipulation risks below. The old launch API records a passed independent-review check at `f77cf377...`;
+that does not constitute review of this new submission. See [the size-fix handoff](SIZE_FIX.md).
+
 This is an implementation-author adversarial review and repair record, using the supplied ETH/v4 checklists and
 reproductions of the recovered findings. **It is not an independent audit of this revision.** No external reviewer
 has signed off the current build. The contributor network's independent review remains a release gate. Tests and
