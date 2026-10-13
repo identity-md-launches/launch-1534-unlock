@@ -58,6 +58,32 @@ The only new compiler warnings are for the test-only `SELFDESTRUCT` helpers that
 exercise forced ETH donations. The existing hook mutability warning also remains.
 No scratch file is required by the submitted tests.
 
+## Revision against the reconciled implementation (commit `398b354`)
+
+The accepted implementation changed under these tests between `e9cd6e0` and `ed59c57`
+(seed-depth gate in `beforeAddLiquidity`, `_verifySeed`/`_verifyAllocations` at staging and
+activation, repeatable staging with per-attempt salts, chunked Merkle certification, and the
+removal of `confirmationInterrupted` from the milestone logic). The only change to the three
+earlier files is one line: `BatchSettlementProperties.t.sol` no longer hashes the removed
+`confirmationInterrupted` flag into its state snapshot. Everything else in them is unchanged.
+
+`RevisionProperties.t.sol` adds adversarial properties for exactly the changed mechanisms:
+
+| Suite | Guarantees checked |
+| --- | --- |
+| `SeedGatePropertiesTest` | Fuzz over 51 opening boundaries from 15% below to 15% above the policy figure with the exact 870M token-only seed: a launch is accepted if and only if `SeedDepth` clears the 17 ETH floor and the pool-share band; every accepted seed's recorded principal and capacity equal the live position's, its opening observation is classed liquid, and after the warm-up window the oracle prices it within 0.2% of the boundary FDV. Fuzz over the 98%-100% liquidity band: launch and activation succeed exactly when the pool receives at least `MIN_POOL_ALLOCATION`; allocation receipts always sum to the supply; the remainder wallet is never credited above the 3% policy share. |
+| `ChunkedCertificationPropertiesTest` | Trees of 1 to 24 recipients with random amounts, random chunk sizes and random `reduce` counts (including counts past the remaining nodes): the round certifies exactly when the last internal node is computed, matching the single-shot `certifyRound` on the same tree via a state snapshot. A parallel session with one corrupted amount reduces to `InvalidProof`, changes nothing and cannot touch the honest session. A certified round refuses every further path. Attestation needs an actual distributor claim with the exact amount, credits once, and synchronizes once. Abandoned sessions cannot be reduced, discard their uniqueness set, and a restarted session certifies. |
+| `MilestoneSampleInvariantTest` | Handler campaign (`fail-on-revert` on) that samples milestones under random time steps, price swings from $100 to $1M per ETH, and six feed corruptions: broken call, stale round, wrong decimals, non-positive answer, `answeredInRound < roundId`, and a future `updatedAt`. An independent ghost chain of valid qualifying samples at most 10 minutes apart is tracked outside the hook. Invariants: no tier advances on an invalid sample or below its threshold; at most one tier per confirmation; no advance before the chain has lasted the required 6 h (24 h for the final tier); the hook's pending start never precedes the ghost chain; tier, `p` and full unlock never go backwards; `p` always matches the tier; pending start and last confirmation are zero together and ordered. A scripted test shows the handler confirms a tier under healthy cadence and that every corruption mode yields an invalid sample. |
+| `RestagingIsolationTest` | After re-staging, the three mixed bundles (old router, old evidence, old oracle) are each refused with the error the hook specifies; attestations made on the abandoned evidence create no credit after activation, and the activated evidence must prove the claim itself; the abandoned router cannot swap and the abandoned oracle cannot be bound. |
+
+Results on Foundry 1.8.3 / solc 0.8.26: full suite 170 tests passed across 37 suites, zero
+failed or skipped. The milestone campaign ran 48 sequences of depth 40 (1,920 handler calls,
+zero reverts); the seed fuzzes 96 cases each; the certification fuzzes 128 cases each.
+No implementation defect was reproduced by this revision's checks, so no `.imd-findings.json`
+is written. Two harness-only issues were found and fixed in the tests themselves during
+development (the distributor's contributor lock and forge-std `bound` wrapping rather than
+clamping out-of-range inputs); neither concerns the implementation.
+
 ## Review limits
 
 No new implementation defect was reproduced by these added checks. They establish

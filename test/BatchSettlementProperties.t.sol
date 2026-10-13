@@ -85,7 +85,6 @@ contract BatchSettlementPropertiesTest is SystemFixture {
                 hook.fullyUnlocked(),
                 hook.qualifyingSince(0),
                 hook.lastConfirmation(),
-                hook.confirmationInterrupted(),
                 trader,
                 operation
             )
