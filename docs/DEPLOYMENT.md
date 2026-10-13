@@ -81,11 +81,18 @@ After this transaction alone: **pool deployed, trading inactive**. Native transf
    oracleCreationCode)`. Exact compiled creation bodies (without arguments) are inputs; the hook validates hashes,
    appends authenticated arguments and CREATE2-deploys the bundle atomically. Read `CompanionsDeployed` and
    `stagedRouter/stagedRewards/stagedOracle`. No ordinary external deployment can substitute for this provenance.
+   The call first re-runs every stage-1 precondition of activation, so it reverts (with the same error activation
+   would give) instead of staging a bundle for an unactivatable launch. It may be repeated until activation; each
+   repeat deploys a fresh identical bundle and the previous one becomes inert.
 2. Certify the **complete frozen** round-0 tree on the staged evidence adapter. Any wallet may submit the certificate;
-   the owner script includes it. Maximum **1024 unique recipients** per round, bounded by transaction gas. Run
-   `scripts/prepare_claim_tree.py` against the API's actual `claims` JSON first. It checks every recipient and root,
-   returning arrays in the exact heap leaf order. If a root has duplicates or exceeds this limit, do not broadcast
-   stage 1 with this package. Native claim eligibility itself is never altered by certificate requirements.
+   the owner script includes it. `certifyRound` takes up to **1024 unique recipients** in one transaction. Larger
+   rounds use the chunked session path from any wallet: `submitLeaves(round, total, accounts, amounts)` repeatedly
+   in heap leaf order (about 500 leaves per transaction), then `reduce(round, count)` until `Certified` is emitted
+   (about 800 internal nodes per transaction). Sessions are per submitter; `abandonSession(round)` discards the
+   caller's own. Run `scripts/prepare_claim_tree.py` against the API's actual `claims` JSON first. It checks every
+   recipient and root, returning arrays in the exact heap leaf order. A root with two leaves for one recipient can
+   never be certified by either path: do not broadcast stage 1 with such a round 0. Native claim eligibility
+   itself is never altered by certificate requirements.
 3. The immutable setup authority calls `configureAndActivate(stagedRouter, stagedRewards, stagedOracle, newNumber)`.
    This is the atomic sealing call. A failure changes no activation state; corrected external conditions can be
    retried with the same bundle. A successful call permanently removes all setup powers.

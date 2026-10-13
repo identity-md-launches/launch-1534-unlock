@@ -25,11 +25,28 @@ contract MerkleClaimEvidence is IClaimEvidence {
     mapping(uint256 round => mapping(address account => bool)) public attested;
 
     mapping(uint256 round => bool) public certified;
+    /// @notice Leaves one `certifyRound` call accepts. Larger rounds use the chunked path below.
     uint256 public constant MAX_LEAVES = 1024;
+
+    /// @notice A chunked certification in progress. Sessions are per submitter and generation, so nobody can
+    /// pollute or abandon anyone else's; a finished session certifies the round for everyone.
+    struct Session {
+        uint256 leaves;
+        uint256 submitted;
+        uint256 reduced;
+    }
+
+    mapping(address submitter => mapping(uint256 round => uint256)) public generation;
+    mapping(bytes32 session => Session) public sessions;
+    mapping(bytes32 session => mapping(uint256 index => bytes32)) private nodes;
+    mapping(bytes32 session => mapping(address account => bool)) private listed;
+
     error UncertifiedRound();
     error DuplicateRecipient();
     error InvalidConfig();
     event Certified(uint256 indexed round, bytes32 root, uint256 recipients);
+    event LeavesSubmitted(uint256 indexed round, address indexed submitter, uint256 from, uint256 count);
+    event SessionAbandoned(uint256 indexed round, address indexed submitter, uint256 generation);
     error NotClaimed();
     error AlreadyAttested();
     error InvalidProof();
@@ -67,9 +84,77 @@ contract MerkleClaimEvidence is IClaimEvidence {
             --i;
             tree[i] = Hashes.commutativeKeccak256(tree[2 * i + 1], tree[2 * i + 2]);
         }
-        if (tree[0] != merkleDistributor.roundOf(round).root) revert InvalidProof();
+        _finish(round, tree[0], n);
+    }
+
+    function _finish(uint256 round, bytes32 root, uint256 n) private {
+        if (root != merkleDistributor.roundOf(round).root) revert InvalidProof();
         certified[round] = true;
-        emit Certified(round, tree[0], n);
+        emit Certified(round, root, n);
+    }
+
+    function sessionOf(address submitter, uint256 round) public view returns (bytes32) {
+        return keccak256(abi.encode(submitter, round, generation[submitter][round]));
+    }
+
+    /// @notice Chunked certification for rounds larger than one transaction can hold. Submit the complete tree's
+    /// leaves in heap order (leaf i of n is node n-1+i), in any chunk sizes; `leaves` is the total and is fixed
+    /// by the caller's first chunk. Uniqueness is enforced across chunks. Only the caller's own session advances.
+    function submitLeaves(
+        uint256 round,
+        uint256 leaves,
+        address[] calldata accounts,
+        uint256[] calldata amounts
+    ) external {
+        bytes32 id = sessionOf(msg.sender, round);
+        Session storage s = sessions[id];
+        if (certified[round] || leaves == 0 || accounts.length == 0 || accounts.length != amounts.length) {
+            revert InvalidConfig();
+        }
+        if (s.leaves == 0) {
+            s.leaves = leaves;
+        } else if (s.leaves != leaves) {
+            revert InvalidConfig();
+        }
+        uint256 start = s.submitted;
+        if (start + accounts.length > leaves) revert InvalidConfig();
+        for (uint256 i; i < accounts.length; ++i) {
+            _list(id, leaves - 1 + start + i, accounts[i], amounts[i]);
+        }
+        s.submitted = start + accounts.length;
+        emit LeavesSubmitted(round, msg.sender, start, accounts.length);
+    }
+
+    function _list(bytes32 id, uint256 index, address account, uint256 amount) private {
+        if (account == address(0)) revert InvalidConfig();
+        if (listed[id][account]) revert DuplicateRecipient();
+        listed[id][account] = true;
+        nodes[id][index] = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
+    }
+
+    /// @notice Computes up to `count` internal nodes of the caller's complete session, highest index first, and
+    /// certifies the round when the root is reached and matches the distributor's. A mismatch changes nothing;
+    /// the submitter can `abandonSession` and start over.
+    function reduce(uint256 round, uint256 count) external {
+        bytes32 id = sessionOf(msg.sender, round);
+        Session storage s = sessions[id];
+        uint256 n = s.leaves;
+        if (certified[round] || n == 0 || s.submitted != n || count == 0) revert InvalidConfig();
+        uint256 internalNodes = n - 1;
+        uint256 done = s.reduced;
+        uint256 end = done + count > internalNodes ? internalNodes : done + count;
+        for (uint256 k = done; k < end; ++k) {
+            uint256 i = internalNodes - 1 - k;
+            nodes[id][i] = Hashes.commutativeKeccak256(nodes[id][2 * i + 1], nodes[id][2 * i + 2]);
+        }
+        s.reduced = end;
+        if (end == internalNodes) _finish(round, nodes[id][0], n);
+    }
+
+    /// @notice Discards the caller's own session for a round so a corrected tree can be submitted.
+    function abandonSession(uint256 round) external {
+        uint256 next = ++generation[msg.sender][round];
+        emit SessionAbandoned(round, msg.sender, next);
     }
 
     // Iterative heapsort bounds certification to O(n log n), including adversarially ordered accounts.

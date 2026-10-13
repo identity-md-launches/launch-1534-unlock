@@ -67,9 +67,7 @@ contract Stage2 is Script {
 
     /// @notice Exact owner transaction data. It deploys all three companions atomically through the hook.
     function deploymentCall(Config memory config) public view returns (bytes memory) {
-        if (!config.hook.bound() || config.hook.activated() || config.hook.stagedRouter() != address(0)) {
-            revert Stage1NotReady();
-        }
+        if (!config.hook.bound() || config.hook.activated()) revert Stage1NotReady();
         if (distributorOf(config) == address(0)) revert Stage1NotReady();
         return abi.encodeCall(
             UnlkHook.deployCompanions,

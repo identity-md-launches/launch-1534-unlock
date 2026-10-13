@@ -1,7 +1,7 @@
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkOracle.sol:108:43
+    ╭▸ src/UnlkOracle.sol:104:43
     │
-108 │             observations.push(Observation(uint64(block.timestamp), tick, liquid, 0, 0));
+104 │             observations.push(Observation(uint64(block.timestamp), tick, liquid, 0, 0));
     │                                           ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -13,9 +13,9 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkOracle.sol:116:47
+    ╭▸ src/UnlkOracle.sol:112:47
     │
-116 │                 observations.push(Observation(uint64(block.timestamp), tick, liquid, cumulative, bad));
+112 │                 observations.push(Observation(uint64(block.timestamp), tick, liquid, cumulative, bad));
     │                                               ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -27,17 +27,17 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[divide-before-multiply]: division before multiplication may lose precision
-    ╭▸ src/UnlkOracle.sol:149:13
+    ╭▸ src/UnlkOracle.sol:145:13
     │
-149 │         if (mean * int256(WINDOW) > diff) --mean;
+145 │         if (mean * int256(WINDOW) > diff) --mean;
     │             ━━━━━━━━━━━━━━━━━━━━━
     │
     ╰ help: https://getfoundry.sh/forge/linting/divide-before-multiply
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkOracle.sol:147:30
+    ╭▸ src/UnlkOracle.sol:143:30
     │
-147 │         int256 mean = diff / int256(WINDOW);
+143 │         int256 mean = diff / int256(WINDOW);
     │                              ━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -49,9 +49,9 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkOracle.sol:149:20
+    ╭▸ src/UnlkOracle.sol:145:20
     │
-149 │         if (mean * int256(WINDOW) > diff) --mean;
+145 │         if (mean * int256(WINDOW) > diff) --mean;
     │                    ━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -63,42 +63,14 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkOracle.sol:150:16
+    ╭▸ src/UnlkOracle.sol:146:16
     │
-150 │         tick = int24(mean);
+146 │         tick = int24(mean);
     │                ━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
     │       
     │       // casting to 'int24' is safe because [explain why]
-    │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
-    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
-
-warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkOracle.sol:180:30
-    │
-180 │         uint256 normalized = uint256(answer) * (10 ** (18 - decimals));
-    │                              ━━━━━━━━━━━━━━━
-    │
-    ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
-    │       // casting to 'uint256' is safe because [explain why]
-    │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
-    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
-
-warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkOracle.sol:191:78
-    │
-191 │         cumulative = observation.tickCumulative + int256(observation.tick) * int256(elapsed);
-    │                                                                              ━━━━━━━━━━━━━━━
-    │
-    ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
-    │       // casting to 'int256' is safe because [explain why]
     │       // forge-lint: disable-next-line(unsafe-typecast)
     │       
     │       
@@ -111,6 +83,34 @@ warning[reentrancy-no-eth]: external call can be reentered before `_status` is u
     │                               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     │
     ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/UnlkOracle.sol:176:30
+    │
+176 │         uint256 normalized = uint256(answer) * (10 ** (18 - decimals));
+    │                              ━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint256' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/UnlkOracle.sol:187:78
+    │
+187 │         cumulative = observation.tickCumulative + int256(observation.tick) * int256(elapsed);
+    │                                                                              ━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'int256' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
     ╭▸ src/UnlkSwapRouter.sol:111:39
@@ -212,76 +212,34 @@ warning[unsafe-typecast]: typecast can truncate values
     │       
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
-warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:225:87
-    │
-225 │         r = _create(bytes.concat(routerCode, abi.encode(poolManager, address(this))), bytes32("router"));
-    │                                                                                       ━━━━━━━━━━━━━━━━━
-    │
-    ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
-    │       // casting to 'bytes32' is safe because [explain why]
-    │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
-    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
-
-warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:226:80
-    │
-226 │         e = _create(bytes.concat(rewardsCode, abi.encode(distributor, token)), bytes32("evidence"));
-    │                                                                                ━━━━━━━━━━━━━━━━━━━
-    │
-    ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
-    │       // casting to 'bytes32' is safe because [explain why]
-    │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
-    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
-
-warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:227:93
-    │
-227 │         o = _create(bytes.concat(oracleCode, abi.encode(poolManager, feed, address(this))), bytes32("oracle"));
-    │                                                                                             ━━━━━━━━━━━━━━━━━
-    │
-    ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
-    │       // casting to 'bytes32' is safe because [explain why]
-    │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
-    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
-
 warning[uninitialized-local]: local variable is read before being initialized
-    ╭▸ src/UnlkHook.sol:358:47
+    ╭▸ src/UnlkHook.sol:416:47
     │
-358 │                 if (addr != address(token) || tokenSeen) revert InvalidEvidence();
+416 │                 if (addr != address(token) || tokenSeen) revert InvalidEvidence();
     │                                               ━━━━━━━━━
     │
     ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
 
 warning[uninitialized-local]: local variable is read before being initialized
-    ╭▸ src/UnlkHook.sol:361:46
+    ╭▸ src/UnlkHook.sol:419:46
     │
-361 │                 if (addr != address(this) || hookSeen) revert InvalidEvidence();
+419 │                 if (addr != address(this) || hookSeen) revert InvalidEvidence();
     │                                              ━━━━━━━━
     │
     ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
 
 warning[reentrancy-no-eth]: external call can be reentered before `p` is updated
-    ╭▸ src/UnlkHook.sol:451:9
+    ╭▸ src/UnlkHook.sol:505:9
     │
-451 │         oracle.checkpoint();
+505 │         oracle.checkpoint();
     │         ━━━━━━━━━━━━━━━━━━━
     │
     ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:443:25
+    ╭▸ src/UnlkHook.sol:497:25
     │
-443 │             uint256 q = uint256(-int256(tokenDelta));
+497 │             uint256 q = uint256(-int256(tokenDelta));
     │                         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -293,9 +251,9 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:449:29
+    ╭▸ src/UnlkHook.sol:503:29
     │
-449 │             _credit(trader, uint256(uint128(tokenDelta)), 0);
+503 │             _credit(trader, uint256(uint128(tokenDelta)), 0);
     │                             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -307,9 +265,9 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:449:37
+    ╭▸ src/UnlkHook.sol:503:37
     │
-449 │             _credit(trader, uint256(uint128(tokenDelta)), 0);
+503 │             _credit(trader, uint256(uint128(tokenDelta)), 0);
     │                                     ━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -320,18 +278,46 @@ warning[unsafe-typecast]: typecast can truncate values
     │       
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
-warning[uninitialized-local]: local variable is read before being initialized
-    ╭▸ src/UnlkHook.sol:604:24
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/UnlkHook.sol:538:71
     │
-604 │         if (tierForFdv(fdv) <= next) {
+538 │             TickMath.getSqrtPriceAtTick(params.tickLower), sqrtUpper, uint128(uint256(params.liquidityDelta))
+    │                                                                       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint128' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/UnlkHook.sol:538:79
+    │
+538 │             TickMath.getSqrtPriceAtTick(params.tickLower), sqrtUpper, uint128(uint256(params.liquidityDelta))
+    │                                                                               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint256' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/UnlkHook.sol:680:24
+    │
+680 │         if (tierForFdv(fdv) <= next) {
     │                        ━━━
     │
     ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:612:37
+    ╭▸ src/UnlkHook.sol:687:37
     │
-612 │             qualifyingSince[next] = uint64(block.timestamp);
+687 │             qualifyingSince[next] = uint64(block.timestamp);
     │                                     ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -343,9 +329,9 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:613:32
+    ╭▸ src/UnlkHook.sol:688:32
     │
-613 │             lastConfirmation = uint64(block.timestamp);
+688 │             lastConfirmation = uint64(block.timestamp);
     │                                ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -357,9 +343,9 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:618:28
+    ╭▸ src/UnlkHook.sol:692:28
     │
-618 │         lastConfirmation = uint64(block.timestamp);
+692 │         lastConfirmation = uint64(block.timestamp);
     │                            ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
@@ -371,9 +357,9 @@ warning[unsafe-typecast]: typecast can truncate values
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
-    ╭▸ src/UnlkHook.sol:628:37
+    ╭▸ src/UnlkHook.sol:702:37
     │
-628 │             qualifyingSince[tier] = uint64(block.timestamp);
+702 │             qualifyingSince[tier] = uint64(block.timestamp);
     │                                     ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe

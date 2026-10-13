@@ -74,23 +74,27 @@ No Slither, Mythril, formal verification or independent contributor review was p
   counter-selling paths. Successful attack simulation is disclosed risk, not an audit pass.
 
 The 1024-leaf sorted certificate consumed **13,943,571 execution gas** in its direct-call measurement; the test
-asserts less than 16,000,000, leaving room for normal transaction/calldata overhead below a 16,777,216 cap. A larger
-or duplicate-recipient frozen tree is a preflight incompatibility, so stage 1 must not be broadcast with it.
+asserts less than 16,000,000, leaving room for normal transaction/calldata overhead below a 16,777,216 cap. Larger
+trees use the chunked session path (`ActivationRobustness.t.sol:ChunkedCertificationTest`, 1500 leaves in three
+submissions and two reductions). A duplicate-recipient frozen tree is a preflight incompatibility, so stage 1 must
+not be broadcast with it.
 
 ## Deployment sizes
 
 | Contract | Creation body bytes | Runtime template bytes |
 |---|---:|---:|
 | UnlkToken | 3444 | 2320 |
-| UnlkHook | 23734 | 22388 |
+| UnlkHook | 25702 | 24328 |
 | UnlkSwapRouter | 8102 | 7761 |
-| MerkleClaimEvidence | 4195 | 3927 |
-| UnlkOracle | 7796 | 7456 |
-| HookDeployer | 24324 | 24296 |
+| MerkleClaimEvidence | 5943 | 5675 |
+| UnlkOracle | 7857 | 7517 |
+| HookDeployer | 26292 | 26264 |
 
-Every deployable runtime is below 24,576 bytes. Creation bodies plus their fixed constructor arguments are below
-49,152 bytes. `HookDeployer` is a helper for prediction/mining, not a replacement for the authenticated platform
-factory. Twenty ABIs are exported, including the verified platform factory, registry, fees and distributor.
+Every deployable runtime is below 24,576 bytes (`UnlkHook` with 248 bytes of margin after this revision's seed
+and allocation checks). Creation bodies plus their fixed constructor arguments are below 49,152 bytes.
+`HookDeployer` is an off-chain helper for prediction/mining whose runtime embeds the hook's init code and now
+exceeds EIP-170; it is called in the VM by tests and scripts, never deployed, and is not a replacement for the
+authenticated platform factory. Twenty ABIs are exported, including the verified platform factory, registry, fees and distributor.
 
 ## Repeating checks that use external inputs
 

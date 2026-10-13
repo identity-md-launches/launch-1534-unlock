@@ -263,7 +263,7 @@ contract StagingCreationRegressionTest is SystemFixture {
         assertTrue(hook.activated());
     }
 
-    function testOnlySetupAuthorityMayStageAndTheBundleCannotBeReplaced() public {
+    function testOnlySetupAuthorityMayStageAndOnlyUntilActivation() public {
         vm.prank(bob);
         vm.expectRevert(UnlkHook.Unauthorized.selector);
         hook.deployCompanions(
@@ -274,6 +274,27 @@ contract StagingCreationRegressionTest is SystemFixture {
             type(UnlkOracle).creationCode
         );
         _deployCompanions();
+        address firstRouter = address(router);
+        address firstRewards = address(rewards);
+        assertEq(hook.stagings(), 1);
+        // Before activation the authority may stage again: a fresh identical bundle, the first one abandoned.
+        _deployCompanions();
+        assertEq(hook.stagings(), 2);
+        assertTrue(address(router) != firstRouter && address(rewards) != firstRewards);
+        assertEq(hook.stagedRouter(), address(router));
+        assertEq(hook.stagedRewards(), address(rewards));
+        assertEq(hook.stagedOracle(), address(oracle));
+        assertEq(address(router.hook()), address(hook));
+        assertEq(oracle.hook(), address(hook));
+        // The abandoned bundle can never be activated.
+        vm.prank(owner);
+        vm.expectRevert(UnlkHook.InvalidConfig.selector);
+        hook.configureAndActivate(firstRouter, MerkleClaimEvidence(firstRewards), oracle, LAUNCH_NUMBER);
+        assertFalse(hook.activated());
+        _activate();
+        assertTrue(hook.activated());
+        assertEq(hook.router(), address(router));
+        // After activation staging is closed for good.
         vm.prank(owner);
         vm.expectRevert(UnlkHook.AlreadyActivated.selector);
         hook.deployCompanions(
@@ -283,9 +304,7 @@ contract StagingCreationRegressionTest is SystemFixture {
             type(MerkleClaimEvidence).creationCode,
             type(UnlkOracle).creationCode
         );
-        assertFalse(hook.activated());
-        _activate();
-        assertTrue(hook.activated());
+        assertEq(hook.stagings(), 2);
     }
 }
 

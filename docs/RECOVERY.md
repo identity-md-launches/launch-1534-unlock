@@ -1,5 +1,10 @@
 # Recovery and reconciliation
 
+Revision of 2026-10-13 (reviewer findings a4b5f9a2, d8778e80, 66b99dca, 153c7ae8 fixed; d0e68f0c and 0147f1a4
+answered as documented decisions): `src/libraries/SeedDepth.sol` added; `UnlkHook`, `UnlkOracle` and
+`MerkleClaimEvidence` changed, so `ReviewedCode` (ORACLE, EVIDENCE) and every artifact digest were regenerated.
+The responses are in `.imd-responses.json`.
+
 Retrieval succeeded on 2026-10-13. **No bundle or clone retrieval error occurred.**
 
 | Input | SHA-256 of downloaded bytes | Commit |

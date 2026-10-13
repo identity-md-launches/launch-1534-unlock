@@ -7,8 +7,8 @@ import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
 import {Currency} from "v4-core/src/types/Currency.sol";
 import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
 import {TickMath} from "v4-core/src/libraries/TickMath.sol";
-import {SqrtPriceMath} from "v4-core/src/libraries/SqrtPriceMath.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {SeedDepth} from "./libraries/SeedDepth.sol";
 import {IUnlkHookView, IChainlinkEthUsd} from "./interfaces/IIntegration.sol";
 
 /// @notice Explicit v4 tick accumulator. No assumed built-in v4 oracle, no spot-price milestones.
@@ -18,7 +18,7 @@ contract UnlkOracle {
 
     uint256 public constant WINDOW = 2 hours;
     uint256 public constant MAX_CHECKPOINT_AGE = 5 minutes;
-    uint256 public constant MIN_SEED_QUOTE_CAPACITY = 17 ether;
+    uint256 public constant MIN_SEED_QUOTE_CAPACITY = SeedDepth.MIN_SEED_QUOTE_CAPACITY;
     uint256 public constant SUPPLY = 1_000_000_000 ether;
     IPoolManager public immutable poolManager;
     /// @dev Chainlink's published ETH/USD heartbeat (1 hour) plus a 30-minute grace. The Sepolia proxy was measured
@@ -92,14 +92,10 @@ contract UnlkOracle {
         (uint160 sqrtPrice, int24 tick, uint24 protocolFee, uint24 lpFee) = poolManager.getSlot0(poolId);
         (uint128 liquidity,,) =
             poolManager.getPositionInfo(poolId, factory, rangeLowerTick, rangeUpperTick, bytes32(0));
-        // Price-independent depth test: locked seed token principal valued at its opening boundary.
-        // 870M tokens at the policy's 20 ETH / billion opening FDV = about 17.4 ETH capacity.
-        // Unlike an actual-ETH-reserve floor, this does not secretly raise the first USD threshold.
-        uint256 depth = 0;
-        if (liquidity != 0 && rangeUpper != 0) {
-            uint256 seedTokens = SqrtPriceMath.getAmount1Delta(rangeLower, rangeUpper, liquidity, false);
-            depth = Math.mulDiv(Math.mulDiv(seedTokens, 1 << 96, rangeUpper), 1 << 96, rangeUpper);
-        }
+        // Price-independent depth test: locked seed token principal valued at its opening boundary, by the
+        // same `SeedDepth` formula the hook enforced at the seed and at activation. 870M tokens at the policy's
+        // 20 ETH / billion opening FDV = about 17.4 ETH capacity. Not an actual-ETH-reserve floor.
+        uint256 depth = SeedDepth.capacity(rangeLower, rangeUpper, liquidity);
         bool liquid = sqrtPrice >= rangeLower && sqrtPrice <= rangeUpper && sqrtPrice != 0
             && liquidity >= MIN_LIQUIDITY && depth >= MIN_SEED_QUOTE_CAPACITY && protocolFee == 0
             && lpFee == 12500;

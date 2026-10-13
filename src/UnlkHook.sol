@@ -11,7 +11,9 @@ import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {BeforeSwapDelta} from "v4-core/src/types/BeforeSwapDelta.sol";
 import {Hooks} from "v4-core/src/libraries/Hooks.sol";
 import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
+import {TickMath} from "v4-core/src/libraries/TickMath.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {SeedDepth} from "./libraries/SeedDepth.sol";
 import {UnlkToken} from "./UnlkToken.sol";
 import {UnlkOracle} from "./UnlkOracle.sol";
 import {
@@ -57,6 +59,14 @@ contract UnlkHook is IHooks {
     uint256 public constant ORACLE_MAX_FEED_AGE = 90 minutes;
     uint256 public constant ORACLE_MAX_CHECKPOINT_AGE = 5 minutes;
     uint128 public constant ORACLE_MIN_LIQUIDITY = 1e18;
+    /// @notice The locked seed's minimum opening-value capacity (see `SeedDepth`). Enforced when the factory
+    /// seeds, when the bundle is staged and when it is activated, so a seed the oracle would class illiquid
+    /// forever can neither launch nor seal.
+    uint256 public constant MIN_SEED_QUOTE_CAPACITY = SeedDepth.MIN_SEED_QUOTE_CAPACITY;
+    /// @notice The pool must receive at least this much of its 87% share: a 1% band for the deployer's
+    /// liquidity rounding, which is about 1e-14 relative in practice. The shortfall goes to the remainder
+    /// wallet, which is still credited exactly `PAYER_ALLOCATION`. A pool seeded below the band cannot launch.
+    uint256 public constant MIN_POOL_ALLOCATION = 861_300_000 ether;
 
     IPoolManager public immutable poolManager;
     UnlkToken public immutable token;
@@ -73,6 +83,10 @@ contract UnlkHook is IHooks {
     int24 public seedTickLower;
     int24 public seedTickUpper;
     bool public seedRecorded;
+    /// @notice The launch-token principal the factory's seed position holds, and its ETH value at the opening
+    /// boundary, recorded when the factory seeds. The position can never shrink, so these stay true.
+    uint256 public seedTokens;
+    uint256 public seedQuoteCapacity;
 
     // Stage-2 configuration, written once by `configureAndActivate`.
     bool public activated;
@@ -87,6 +101,9 @@ contract UnlkHook is IHooks {
     bytes32 private stagedRewardsHash;
     bytes32 private stagedOracleHash;
     uint64 public stagedLaunchNumber;
+    /// @notice How many bundles have been staged. Staging may be repeated until activation; each attempt
+    /// re-runs every stage-1 check and deploys a fresh identical bundle, so an abandoned bundle is inert.
+    uint64 public stagings;
     address public swarm;
     /// @notice Proven recipient of the initial 3% allocation, independent of current balances and fee assignment.
     /// On an unpaid launch this is the treasury that actually received the remainder.
@@ -101,7 +118,6 @@ contract UnlkHook is IHooks {
     uint8 public tier;
     uint64[6] public qualifyingSince;
     uint64 public lastConfirmation;
-    bool public confirmationInterrupted;
     bytes32 private pendingOperation;
     address private pendingTrader;
 
@@ -200,7 +216,9 @@ contract UnlkHook is IHooks {
     /// @notice Stage 2a: deploy exactly the reviewed creation code, with arguments derived here.
     /// Hashing the creation code proves constructor state as well as runtime. A runtime-only check cannot
     /// detect a lookalike whose custom constructor forged hidden credit mappings or oracle history.
-    /// The one bundle cannot be replaced. All deployments and these receipts roll back together on failure.
+    /// Every stage-1 precondition of `configureAndActivate` is evaluated here first, so a bundle is never
+    /// staged for a launch that cannot activate. Until activation the authority may stage again (a fresh
+    /// identical bundle under a new salt); after it, never. All writes roll back together on failure.
     function deployCompanions(
         uint64 number,
         IChainlinkEthUsd feed,
@@ -209,22 +227,17 @@ contract UnlkHook is IHooks {
         bytes calldata oracleCode
     ) external returns (address r, address e, address o) {
         if (msg.sender != setupAuthority) revert Unauthorized();
-        if (activated || stagedRouter != address(0)) revert AlreadyActivated();
-        if (!bound || !seedRecorded) revert InvalidPool();
+        if (activated) revert AlreadyActivated();
         if (
             keccak256(routerCode) != ReviewedCode.ROUTER || keccak256(rewardsCode) != ReviewedCode.EVIDENCE
                 || keccak256(oracleCode) != ReviewedCode.ORACLE
         ) revert InvalidConfig();
-        _verifyServices();
-        address distributor = _verifyLaunchRecord(number);
-        if (address(feed).code.length == 0 || feed.decimals() != 8) revert InvalidConfig();
-        if (
-            block.chainid == SEPOLIA_CHAIN_ID
-                && (address(feed) != SEPOLIA_ETH_USD || address(feed).codehash != SepoliaRelease.FEED)
-        ) revert InvalidConfig();
-        r = _create(bytes.concat(routerCode, abi.encode(poolManager, address(this))), bytes32("router"));
-        e = _create(bytes.concat(rewardsCode, abi.encode(distributor, token)), bytes32("evidence"));
-        o = _create(bytes.concat(oracleCode, abi.encode(poolManager, feed, address(this))), bytes32("oracle"));
+        address distributor = _verifyLaunch(number);
+        _verifyFeed(address(feed));
+        ++stagings;
+        r = _create(bytes.concat(routerCode, abi.encode(poolManager, address(this))), _salt("router"));
+        e = _create(bytes.concat(rewardsCode, abi.encode(distributor, token)), _salt("evidence"));
+        o = _create(bytes.concat(oracleCode, abi.encode(poolManager, feed, address(this))), _salt("oracle"));
         stagedRouter = r;
         stagedRewards = e;
         stagedOracle = o;
@@ -236,6 +249,11 @@ contract UnlkHook is IHooks {
     }
 
     event CompanionsDeployed(uint64 indexed number, address router, address rewards, address oracle);
+
+    /// @dev A fresh salt per staging attempt, so a repeated staging never collides with an abandoned bundle.
+    function _salt(bytes32 label) private view returns (bytes32) {
+        return keccak256(abi.encode(label, stagings));
+    }
 
     function _create(bytes memory code, bytes32 salt) private returns (address at) {
         assembly ("memory-safe") { at := create2(0, add(code, 32), mload(code), salt) }
@@ -277,31 +295,13 @@ contract UnlkHook is IHooks {
         if (address(rewards_) != stagedRewards || address(rewards_).codehash != stagedRewardsHash) {
             revert InvalidEvidence();
         }
-        _verifyServices();
-        address distributor = _verifyLaunchRecord(launchNumber_);
-        _verifyPosition(launchNumber_);
+        address distributor = _verifyLaunch(launchNumber_);
         address requester = token.initialRecipient();
-        // Historical transfer receipts, not a mutable fee beneficiary or current balance.
-        if (
-            !token.distributionComplete() || token.initialMinter() != launchFactory || requester == address(0)
-                || requester == address(poolManager) || requester == distributor || requester == launchFactory
-                || requester == address(this)
-                || token.initialAllocation(distributor) != token.SWARM_ALLOCATION()
-                || token.initialAllocation(address(poolManager)) > token.POOL_ALLOCATION()
-                || token.initialAllocation(address(poolManager)) + 1e12 < token.POOL_ALLOCATION()
-                || token.initialAllocation(requester) < token.PAYER_ALLOCATION()
-                || token.initialAllocation(requester) > token.PAYER_ALLOCATION() + 1e12
-        ) revert InvalidEvidence();
 
         // Claim evidence reads this launch's distributor for this token.
         if (rewards_.token() != address(token) || rewards_.distributor() != distributor) {
             revert InvalidEvidence();
         }
-        if (
-            IMerkleDistributor(distributor).token() != address(token)
-                || IMerkleDistributor(distributor).opener() != launchFactory
-        ) revert InvalidEvidence();
-
         if (!MerkleClaimEvidence(address(rewards_)).certified(0)) revert InvalidEvidence();
 
         // Router and oracle are bound immutably to this hook and this manager.
@@ -321,6 +321,64 @@ contract UnlkHook is IHooks {
         oracle_.bind(_key, address(token), seedTickLower, seedTickUpper);
         oracle_.checkpoint();
         emit Activated(router_, address(rewards_), address(oracle_), launchNumber_, requester);
+    }
+
+    /// @dev Every stage-1 precondition of activation that does not depend on a companion, in one place, so
+    /// staging and activation cannot disagree about whether the launch is activatable. Reverts, in order, on:
+    /// unbound or unseeded pool; unverified Sepolia services; a registry record that is not this launch; a
+    /// factory position that is not the recorded seed; allocation receipts outside the policy bands; a
+    /// distributor that is not this launch's; a live seed below the oracle's liquidity floor.
+    function _verifyLaunch(uint64 launchNumber_) private view returns (address distributor) {
+        if (!bound || !seedRecorded) revert InvalidPool();
+        _verifyServices();
+        distributor = _verifyLaunchRecord(launchNumber_);
+        _verifyPosition(launchNumber_);
+        _verifyAllocations(distributor);
+        _verifySeed();
+    }
+
+    /// @dev Historical transfer receipts, not a mutable fee beneficiary or current balance. The pool may hold
+    /// slightly less than its share (deployer liquidity rounding, bounded by `MIN_POOL_ALLOCATION`); the
+    /// remainder wallet then holds slightly more, and is still credited exactly `PAYER_ALLOCATION`.
+    function _verifyAllocations(address distributor) private view {
+        address requester = token.initialRecipient();
+        uint256 poolReceived = token.initialAllocation(address(poolManager));
+        uint256 requesterReceived = token.initialAllocation(requester);
+        if (
+            !token.distributionComplete() || token.initialMinter() != launchFactory || requester == address(0)
+                || requester == address(poolManager) || requester == distributor || requester == launchFactory
+                || requester == address(this)
+                || token.initialAllocation(distributor) != token.SWARM_ALLOCATION()
+                || poolReceived > token.POOL_ALLOCATION() || poolReceived < MIN_POOL_ALLOCATION
+                || requesterReceived < token.PAYER_ALLOCATION()
+                || token.SWARM_ALLOCATION() + poolReceived + requesterReceived != token.SUPPLY()
+        ) revert InvalidEvidence();
+        if (
+            IMerkleDistributor(distributor).token() != address(token)
+                || IMerkleDistributor(distributor).opener() != launchFactory
+        ) revert InvalidEvidence();
+    }
+
+    /// @dev The live seed, not a constant: the same depth the oracle will class observations liquid by.
+    function _verifySeed() private view {
+        (uint128 liquidity,,) =
+            poolManager.getPositionInfo(poolId, launchFactory, seedTickLower, seedTickUpper, bytes32(0));
+        (uint256 principal, uint256 depth) = SeedDepth.quoteCapacity(
+            TickMath.getSqrtPriceAtTick(seedTickLower), TickMath.getSqrtPriceAtTick(seedTickUpper), liquidity
+        );
+        if (
+            liquidity < ORACLE_MIN_LIQUIDITY || depth < MIN_SEED_QUOTE_CAPACITY
+                || principal < MIN_POOL_ALLOCATION
+                || principal > token.initialAllocation(address(poolManager))
+        ) revert InvalidPool();
+    }
+
+    function _verifyFeed(address feed) private view {
+        if (feed.code.length == 0 || IChainlinkEthUsd(feed).decimals() != 8) revert InvalidConfig();
+        if (
+            block.chainid == SEPOLIA_CHAIN_ID
+                && (feed != SEPOLIA_ETH_USD || feed.codehash != SepoliaRelease.FEED)
+        ) revert InvalidConfig();
     }
 
     /// @dev The factory's registry is its own immutable record, written in the launch transaction. It must list
@@ -387,14 +445,10 @@ contract UnlkHook is IHooks {
                 || oracle_.bound() || oracle_.MAX_FEED_AGE() != ORACLE_MAX_FEED_AGE
                 || oracle_.MAX_CHECKPOINT_AGE() != ORACLE_MAX_CHECKPOINT_AGE
                 || oracle_.MIN_LIQUIDITY() != ORACLE_MIN_LIQUIDITY || oracle_.WINDOW() != 2 hours
-                || oracle_.MIN_SEED_QUOTE_CAPACITY() != 17 ether || oracle_.SUPPLY() != token.SUPPLY()
+                || oracle_.MIN_SEED_QUOTE_CAPACITY() != MIN_SEED_QUOTE_CAPACITY
+                || oracle_.SUPPLY() != token.SUPPLY()
         ) revert InvalidConfig();
-        address feed = address(oracle_.feed());
-        if (
-            block.chainid == SEPOLIA_CHAIN_ID
-                && (feed != SEPOLIA_ETH_USD || feed.codehash != SepoliaRelease.FEED)
-        ) revert InvalidConfig();
-        if (feed.code.length == 0 || oracle_.feed().decimals() != 8) revert InvalidConfig();
+        _verifyFeed(address(oracle_.feed()));
     }
 
     // ------------------------------------------------------------------ swaps
@@ -465,13 +519,33 @@ contract UnlkHook is IHooks {
         _checkPool(key);
         // All official-pool liquidity is the factory's seed; it has no removal path. No JIT fee diversion.
         if (sender != launchFactory) revert Unauthorized();
-        if (!seedRecorded) {
-            seedRecorded = true;
-            seedTickLower = params.tickLower;
-            seedTickUpper = params.tickUpper;
-        }
+        if (!seedRecorded) _recordSeed(params);
         if (activated) oracle.checkpoint();
         return IHooks.beforeAddLiquidity.selector;
+    }
+
+    /// @dev The first position is the launch seed. It must be the policy's token-only principal (price at or
+    /// above its range, so the range holds only UNLK) within the pool-share band, and worth at least the
+    /// oracle's opening-value floor. A seed that fails here reverts the launch transaction itself, so a pool
+    /// that could never activate is never created, let alone staged.
+    function _recordSeed(ModifyLiquidityParams calldata params) private {
+        if (params.liquidityDelta <= 0 || params.liquidityDelta > int256(uint256(type(uint128).max))) {
+            revert InvalidPool();
+        }
+        uint160 sqrtUpper = TickMath.getSqrtPriceAtTick(params.tickUpper);
+        (uint160 sqrtPrice,,,) = poolManager.getSlot0(poolId);
+        (uint256 principal, uint256 depth) = SeedDepth.quoteCapacity(
+            TickMath.getSqrtPriceAtTick(params.tickLower), sqrtUpper, uint128(uint256(params.liquidityDelta))
+        );
+        if (
+            sqrtPrice < sqrtUpper || principal < MIN_POOL_ALLOCATION || principal > token.POOL_ALLOCATION()
+                || depth < MIN_SEED_QUOTE_CAPACITY
+        ) revert InvalidPool();
+        seedRecorded = true;
+        seedTickLower = params.tickLower;
+        seedTickUpper = params.tickUpper;
+        seedTokens = principal;
+        seedQuoteCapacity = depth;
     }
 
     function afterAddLiquidity(
@@ -596,22 +670,22 @@ contract UnlkHook is IHooks {
         try oracle.fdvUsd() returns (uint256 value) {
             fdv = value;
         } catch {
-            // Preserve earned tiers and visible pending start, but never count an observed invalid interval.
-            confirmationInterrupted = true;
+            // An invalid sample is not a sample: it never confirms, never advances `lastConfirmation`, and
+            // preserves earned tiers and the visible pending start. Whether it restarts the run is decided
+            // only by the gap between valid samples below, exactly as if nobody had called, so a call made
+            // during routine feed lateness cannot discard confirmation that an uncalled interval would keep.
             return false;
         }
         uint8 next = tier;
         if (tierForFdv(fdv) <= next) {
             qualifyingSince[next] = 0;
             lastConfirmation = 0;
-            confirmationInterrupted = false;
             return false;
         }
         uint256 gap = block.timestamp - lastConfirmation;
-        if (qualifyingSince[next] == 0 || confirmationInterrupted || gap > MAX_CONFIRMATION_GAP) {
+        if (qualifyingSince[next] == 0 || gap > MAX_CONFIRMATION_GAP) {
             qualifyingSince[next] = uint64(block.timestamp);
             lastConfirmation = uint64(block.timestamp);
-            confirmationInterrupted = false;
             return false;
         }
         if (gap < MIN_CONFIRMATION_INTERVAL) return false;

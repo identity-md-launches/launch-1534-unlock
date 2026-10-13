@@ -40,9 +40,13 @@ checks. [Validation evidence](docs/VALIDATION.md) distinguishes unit/invariant t
 * Stage 2a: the setup authority calls `deployCompanions(number,feed,routerCode,evidenceCode,oracleCode)` on the
   hook. Each supplied **creation bytecode** must match its compiled constant hash. The hook derives constructor
   arguments from its stage-1 records and deploys all three companions by CREATE2 in one atomic call. This also
-  proves their initial storage, unlike ABI or runtime matching alone. Their addresses and exact runtime hashes
-  are recorded once; no replacement is possible.
-* Stage 2b: anyone certifies the complete unique-recipient round-0 tree in `MerkleClaimEvidence.certifyRound`.
+  proves their initial storage, unlike ABI or runtime matching alone. Staging first re-runs every stage-1
+  precondition of activation (services, registry record, seed position, allocation receipts, distributor
+  bindings, live seed capacity), so nothing is staged for a launch that cannot activate. Until activation the
+  authority may stage again (a fresh identical bundle under a new salt; the abandoned one can never activate);
+  after activation staging is closed permanently.
+* Stage 2b: anyone certifies the complete unique-recipient round-0 tree in `MerkleClaimEvidence.certifyRound`
+  (up to 1024 leaves in one call) or, for larger rounds, through the chunked `submitLeaves`/`reduce` session path.
   Then the setup authority calls `configureAndActivate(router,evidence,oracle,number)`. It validates stage-1
   records, token creation provenance, allocation receipts, pool/range, dependencies, code/settings and reciprocal
   bindings, binds the oracle, starts observation, and permanently seals. Failure rolls back all activation writes.
@@ -95,15 +99,28 @@ fees remain. Prices falling or oracle outages never reduce a reached tier.
 * Latest pool checkpoint no older than **5 minutes** when read. Every swap and liquidity operation checkpoints
   before/after state changes. Anyone may checkpoint or call `updateMilestone`.
 * Confirmation samples at least **4 minutes** apart, at most **10 minutes** apart. No parallel tier accumulation.
-  An observed invalid value never confirms a tier; it marks the pending run interrupted. The next valid sample
-  starts a fresh confirmation. Earned rights remain. Long gaps and a genuine below-threshold value also restart
-  pending confirmation. Repeated same-block calls provide no progress.
+  An invalid value (stale or incoherent feed, illiquid or stale pool reading) is not a sample: it never confirms a
+  tier and never advances the cadence clock, and earned rights remain. Whether a run restarts is decided only by
+  the gap between **valid** samples, so an invalid interval has the same effect whether or not somebody called
+  during it: shorter than the 10-minute gap it is simply skipped, longer and the next valid sample restarts the
+  run. A genuine below-threshold value also restarts. Repeated same-block calls provide no progress.
 * **17 ETH minimum opening-value capacity of the locked factory seed**, plus in-range price and minimum seed
   liquidity `1e18`, continuously over the TWAP window. This is a price-independent capital-quality check:
   870M tokens at 20 ETH/billion provide approximately 17.4 ETH capacity. It is explicitly **not** a claim of 17 ETH
   cash reserves. There is no additional actual-ETH-reserve threshold hiding behind the $100K tier.
 * The test seed conservatively rounds the 20 ETH cap to the native token-only boundary tick 177300, giving
   19.968425 ETH FDV and about 17.37253 ETH seed capacity. Tests also prove the first tier below 10 ETH cash reserves.
+* **The floor is enforced three times, never assumed.** `beforeAddLiquidity` computes the seed's principal and
+  opening-value capacity (`SeedDepth`, the oracle's own formula) when the factory seeds and reverts the launch
+  transaction if the capacity is below 17 ETH or the principal is outside the pool-share band; `deployCompanions`
+  and `configureAndActivate` recompute both from the live factory position. The minimum opening FDV that passes
+  is 17 / 0.87 = 19.54 ETH, 2.3% under the 20 ETH policy cap (under four tick spacings of rounding). A seed that
+  would leave the oracle permanently illiquid therefore cannot launch, let alone seal.
+* **Allocation receipts are checked against bands, not a dust tolerance.** The pool must have received between
+  99% and 100% of its 870M share (`MIN_POOL_ALLOCATION` = 861.3M), the remainder wallet at least its 30M, the
+  distributor exactly 100M, and the three must sum to the supply. The remainder wallet is credited exactly 30M
+  whatever rounding it received. Deployer liquidity rounding is about 1e-14 relative, so the band is generous
+  without changing the economics measurably.
 
 A high sustained price can still force all tiers. At a fixed test feed of $2,000/ETH, raising the token-only pool
 to $5.1M and waiting **56 hours** costs about **181.21 ETH gross**, **2.47 ETH net exit loss** without counter-selling;

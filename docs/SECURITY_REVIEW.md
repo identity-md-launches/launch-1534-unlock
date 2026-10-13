@@ -9,6 +9,10 @@ this report carry no independent authority.
 
 | Finding | Repair and evidence |
 |---|---|
+| Revision a4b5f9a2: activation demanded the factory seed within 1e12 wei of 870M while staging was single-shot, so sub-dust deployer rounding stranded stage 1 forever | Replaced the dust tolerance with policy bands (pool 99-100% of its share, remainder at least 3%, distributor exactly 10%, sum equal to the supply; the remainder wallet is credited exactly 30M regardless). `deployCompanions` now runs the same `_verifyLaunch` as `configureAndActivate`, so an unactivatable launch cannot be staged, and staging may be repeated until activation. `beforeAddLiquidity` refuses a seed outside the band in the launch transaction itself. `ActivationRobustness.t.sol` reproduces the reviewer's exact 1e9-short seed and activates it; below-band seeds revert the launch. |
+| Revision d8778e80: the 17 ETH seed-capacity floor was pinned as an oracle constant but never checked against the real seed, so an opening cap 2.3% under 20 ETH sealed a hook whose milestones could never confirm | `SeedDepth` is one internal library used by the oracle, the hook's seed callback and both stage-2 calls. The launch transaction reverts if the seed's opening-value capacity is below 17 ETH (reproduced at the reviewer's -177840 tick), and staging/activation recompute it from the live position. The recorded `seedTokens`/`seedQuoteCapacity` are public. The constant and its 19.54 ETH minimum opening FDV are documented, not hidden. |
+| Revision 66b99dca: a permissionless `updateMilestone` during a short feed outage restarted confirmation that an unobserved identical outage would have kept | Removed the observed-interruption flag. An invalid sample never confirms and never advances the cadence clock; restart is decided only by the gap between valid samples, identical for observed and unobserved intervals. `testObservedAndUnobservedInvalidIntervalsAgree` runs both from one snapshot. |
+| Revision 153c7ae8: rounds over 1024 leaves could never be certified, so their native claimants received tokens but no sell quota | Added per-submitter chunked certification (`submitLeaves`/`reduce`/`abandonSession`) with cross-chunk uniqueness, tested at 1500 leaves including duplicates, wrong roots, foreign sessions and single-leaf rounds. Duplicate-recipient roots remain uncertifiable by design. |
 | Companion ABI/code presence could accept malicious implementations | The hook itself CREATE2-deploys code only after its **creation body hash** matches the compiled constant. Arguments come from authenticated stage-1 records. It records exact addresses/runtime hashes, then only that bundle can activate. This proves constructor state too: a custom constructor cannot prepopulate fake credits or price history. Mutation, inconsistent immutable, counterfeit constructor, rollback and replacement tests are in `SecurityRegression.t.sol`. |
 | Mutable fee requester/current balance was not proof of initial allocation | Standard token transfers passively record the initial factory distribution until its first zero balance. Activation authenticates the token's expected CREATE2 address using its exact creation hash and launch number, verifies registry/pool records and allocation receipts, then credits the actual remainder recipient. Subsequent transfers and `setRequester` cannot move the original credit. Tests cover early transfer, fee reassignment, later donations, and unpaid treasury receipt. |
 | Two Merkle leaves for one account permit larger attestation after smaller claim | Before attestation, reconstruct the **complete** root and prove every account unique. Double-hashed leaves and complete internal-node reconstruction rule out omitting a sibling. Native claimed flag and exact proof are still required. Certification is permissionless, immutable per round, maximum 1024 leaves, and uses bounded iterative heapsort. Duplicate, incomplete, odd-sized, multileaf and maximum sorted-tree tests cover the boundary. |
@@ -60,9 +64,10 @@ keeps this economic limitation for independent review instead of labelling a lon
 ## Trust and scope
 
 * Quotas apply only to the official pool. Freely transferable UNLK can trade through other pools/contracts.
-* Setup authority can stage/activate once, but cannot supply altered code, invented constructor state, substitute
-  routes, reset tiers, change the payer, withdraw funds or install a later implementation. Refusing to activate
-  still prevents official trading. Thus owner-wallet execution must be secured **before** stage 1.
+* Setup authority can stage (repeatedly, until activation) and activate once, but cannot supply altered code,
+  invented constructor state, substitute routes, reset tiers, change the payer, withdraw funds or install a later
+  implementation. Refusing to activate still prevents official trading. Thus owner-wallet execution must be
+  secured **before** stage 1.
 * The platform signs stage 1 and supplies a unique new launch number, source attestation and authentic frozen
   allocations. Registry artifacts and immutable factory code bind those outputs. The hook cannot cause IMD to
   create a launch record or compel an owner wallet to sign.
@@ -70,14 +75,20 @@ keeps this economic limitation for independent review instead of labelling a lon
   its aggregator. Current valid ETH/USD is combined with token/ETH TWAP; it is not a separate UNLK valuation source.
 * Uniswap manager governance can set protocol fees. The hook refuses changed fee economics, which can stop official
   swaps even though there is no hook-admin pause. Already earned rights stay recorded. No recovery/upgrade escape
-  exists if an immutable dependency becomes unusable.
-* Certification is capped at 1024 leaves for transaction gas. A larger or duplicate-recipient frozen root is an
-  explicit preflight failure for this package, not a reason to strand a stage-1 pool. A historical live IMD tree
+  exists if an immutable dependency becomes unusable. **Release decision (revision finding d0e68f0c):** this is
+  deliberate. The alternative, continuing to trade at a higher total fee, would silently change the paid-for
+  1.25% split the brief fixes; halting keeps the promise and loses liveness. The requester must accept one or the
+  other explicitly; the code implements the halt. Holders can still trade the token on other pools.
+* Single-call certification is capped at 1024 leaves for transaction gas; larger rounds are certified in chunks.
+  A duplicate-recipient frozen root is an explicit preflight failure for this package, not a reason to strand a
+  stage-1 pool. A historical live IMD tree
   with 224 distinct wallets was independently reconstructed by `prepare_claim_tree.py`; it is **not this new
   launch's reward snapshot**. Native claims remain possible even before certification or during oracle outages.
 * Rewards are deduplicated per round/account, with no artificial ceiling on actual cumulative claims. The treasury
   can fund and open later native remediation rounds under the existing distributor policy; their certified,
-  actually paid claims also create E. This is an external platform authority, not a hook exemption. The recovered
+  actually paid claims also create E. This is an external platform authority, not a hook exemption (revision
+  finding 0147f1a4 records it as a trust assumption: the treasury can route tokens it holds to chosen wallets with
+  sell quota that plain transfer recipients never get). The recovered
   100M cumulative cap was removed because it could reject genuine later rewards; its storage-tampering test is
   replaced by real-claim monotonicity and funded multi-round tests. Recycling inventory through treasury-approved
   rounds can create additional rights, just as newly executed buys can; the treasury's reward administration is

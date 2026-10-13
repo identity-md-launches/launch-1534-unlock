@@ -230,8 +230,66 @@ contract OracleTest is SystemFixture {
         feed.setBroken(false);
         _advance(3 minutes);
         hook.updateMilestone();
-        assertGt(hook.qualifyingSince(1), since, "new valid run after interruption");
+        // The one-minute invalid interval sits inside the 10-minute valid-sample gap, so the run continues exactly
+        // as it would have had nobody called during it (see testObservedAndUnobservedInvalidIntervalsAgree).
+        assertEq(hook.qualifyingSince(1), since, "short invalid interval neither counts nor restarts");
+        assertEq(hook.lastConfirmation(), block.timestamp, "the valid sample confirms");
         assertEq(hook.p(), 3500);
+    }
+
+    /// @dev Finding 66b99dca: whether a short feed failure restarts confirmation must not depend on whether a
+    /// permissionless call happened to observe it. Both runs: 5h50m of confirmation, one invalid minute, then
+    /// the same two valid samples. Both must confirm tier 1 at the same moment.
+    function testObservedAndUnobservedInvalidIntervalsAgree() public {
+        uint256 snapshot = vm.snapshotState();
+        uint8 unobserved = _invalidMinuteThenTwoSamples(false);
+        uint64 unobservedSince = hook.qualifyingSince(0);
+        vm.revertToState(snapshot);
+        uint8 observed = _invalidMinuteThenTwoSamples(true);
+        assertEq(observed, unobserved, "call timing changed the outcome");
+        assertEq(observed, 1, "tier 1 confirmed in both runs");
+        assertEq(hook.qualifyingSince(0), unobservedSince, "same pending start in both runs");
+    }
+
+    function _invalidMinuteThenTwoSamples(bool callDuringFailure) internal returns (uint8) {
+        feed.set(300000e8);
+        _warm();
+        hook.updateMilestone();
+        uint64 since = hook.qualifyingSince(0);
+        for (uint256 i; i < 70; ++i) {
+            _advance(5 minutes);
+            hook.updateMilestone();
+        }
+        assertEq(hook.tier(), 0);
+        assertEq(hook.qualifyingSince(0), since);
+        feed.setBroken(true);
+        _advance(1 minutes);
+        if (callDuringFailure) assertFalse(hook.updateMilestone());
+        feed.setBroken(false);
+        _advance(4 minutes);
+        feed.fresh();
+        hook.updateMilestone();
+        _advance(5 minutes);
+        hook.updateMilestone();
+        return hook.tier();
+    }
+
+    /// @dev An invalid interval longer than the maximum gap restarts whether or not it was observed mid-way.
+    function testLongInvalidIntervalRestartsWhetherObservedOrNot() public {
+        feed.set(300000e8);
+        _warm();
+        hook.updateMilestone();
+        uint64 since = hook.qualifyingSince(0);
+        feed.setBroken(true);
+        _advance(6 minutes);
+        assertFalse(hook.updateMilestone());
+        assertEq(hook.qualifyingSince(0), since, "pending start visible through the failure");
+        _advance(6 minutes);
+        feed.setBroken(false);
+        feed.fresh();
+        hook.updateMilestone();
+        assertGt(hook.qualifyingSince(0), since, "12 minutes without a valid sample restarts");
+        assertEq(hook.tier(), 0);
     }
 
     function testInvalidDataLongerThanGapRestartsOnNextValidCall() public {
